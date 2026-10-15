@@ -165,7 +165,22 @@ textarea{min-height:90px;resize:vertical}
 
 /* Tabs */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
-.tabs button{flex:1;max-width:150px;background:none;border:none;border-radius:14px;padding:10px 6px;color:var(--muted);font-weight:500}
+.tabs button{flex:1;max-width:130px;background:none;border:none;border-radius:14px;padding:10px 4px;color:var(--muted);font-weight:500;font-size:.88rem}
+.chart{width:100%;height:auto;display:block;margin-top:8px;overflow:visible}
+.chart .ct{font-size:10px;fill:var(--muted);font-family:var(--sans)}
+.chart .cv{font-size:11px;fill:var(--ink);font-weight:600;font-family:var(--sans)}
+.hb{display:grid;grid-template-columns:minmax(7.5em,40%) 1fr 2.2em;align-items:center;gap:10px;padding:5px 0;font-size:.9rem}
+.hb .hl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hb .ht{height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex}
+.hb .ht i{display:block;height:100%}
+.hb .ht:not(.stack) i{border-radius:6px}
+.hb .hc{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.sub-h{font-size:.9rem;font-weight:600;margin:16px 0 4px}
+.mini-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.78rem;color:var(--muted);margin-top:8px}
+.mini-legend span{display:inline-flex;align-items:center;gap:5px}
+.insights{margin:10px 0 0;padding:0;list-style:none;font-size:.9rem}
+.insights li{padding:3px 0}
+#metricRange{margin-bottom:14px}
 .tabs button[aria-selected="true"]{color:var(--ink);background:var(--period-soft);font-weight:600}
 
 /* Sheet */
@@ -255,6 +270,22 @@ textarea{min-height:90px;resize:vertical}
     </div>
   </section>
 
+  <!-- Métricas -->
+  <section id="v-metrics" hidden>
+    <h2 class="title">Métricas</h2>
+    <div class="chips" id="metricRange">
+      <button class="chip" data-mrange="6" aria-pressed="true">Últimos 6 meses</button>
+      <button class="chip" data-mrange="12" aria-pressed="false">Últimos 12 meses</button>
+      <button class="chip" data-mrange="all" aria-pressed="false">Todo</button>
+    </div>
+    <div class="stats" id="mStats"></div>
+    <div class="panel"><h3>Duración de tus ciclos</h3><p>Días desde el inicio de un periodo hasta el siguiente.</p><div id="mCycles"></div></div>
+    <div class="panel"><h3>Duración de tu periodo</h3><p>Días de sangrado en cada ciclo.</p><div id="mPeriods"></div></div>
+    <div class="panel"><h3>Síntomas más frecuentes</h3><p>Número de días en que registraste cada síntoma.</p><div id="mSym"></div></div>
+    <div class="panel"><h3>Estado de ánimo</h3><p>Número de días en que registraste cada estado.</p><div id="mMood"></div></div>
+    <div class="panel"><h3>Actividad sexual</h3><p>Días con actividad sexual registrada.</p><div id="mSex"></div></div>
+  </section>
+
   <!-- Ajustes -->
   <section id="v-settings" hidden>
     <h2 class="title">Ajustes</h2>
@@ -317,6 +348,7 @@ textarea{min-height:90px;resize:vertical}
 <nav class="tabs" role="tablist">
   <button role="tab" data-view="v-cal" aria-selected="true">Calendario</button>
   <button role="tab" data-view="v-cycles" aria-selected="false">Ciclos</button>
+  <button role="tab" data-view="v-metrics" aria-selected="false">Métricas</button>
   <button role="tab" data-view="v-settings" aria-selected="false">Ajustes</button>
 </nav>
 
@@ -602,7 +634,7 @@ function applyTheme(){
 
 function renderAll(){
   const st=stats(),fc=forecast(st);
-  renderHero(st,fc);renderCalendar(fc);renderCycles(st);renderSettings();
+  renderHero(st,fc);renderCalendar(fc);renderCycles(st);renderMetrics(st,fc);renderSettings();
   if(!$('pLen').value)$('pLen').value=st.period;
 }
 
@@ -662,7 +694,7 @@ $('heroActions').addEventListener('click',e=>{
 
 // Pestañas
 function showView(id){
-  ['v-cal','v-cycles','v-settings'].forEach(v=>$(v).hidden=v!==id);
+  ['v-cal','v-cycles','v-metrics','v-settings'].forEach(v=>$(v).hidden=v!==id);
   document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===id));
   window.scrollTo(0,0);
 }
@@ -815,6 +847,114 @@ $('exportXlsx').addEventListener('click',async()=>{
     const r=await saveFile(new Blob([out]),'mi-ciclo-'+k(t)+'.xlsx');
     if(r==='ok')toast('Hoja de cálculo lista');
   }catch(e){toast('No se pudo crear el archivo');}
+});
+
+// Métricas
+let mRange='6';
+const PH_ORDER=['menstrual','folicular','ovulatoria','lutea'];
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const EMPTY='<p class="empty">Aún no hay registros en este periodo.</p>';
+function barChart(vals,labels,color,opts){
+  opts=opts||{};
+  const W=320,H=160,pt=20,pb=22,n=vals.length;
+  const max=(Math.max.apply(null,vals.concat([opts.avg||0,1])))*1.18;
+  const bw=W/n;
+  let s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(opts.label||'')+'">';
+  s+='<line x1="0" x2="'+W+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="var(--line)"/>';
+  if(opts.avg!=null){
+    const y=pt+(H-pt-pb)*(1-opts.avg/max);
+    s+='<line x1="0" x2="'+W+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="var(--muted)" stroke-dasharray="4 4"/>';
+    s+='<text x="2" y="'+(y-5).toFixed(1)+'" class="ct">promedio '+(Math.round(opts.avg*10)/10)+'</text>';
+  }
+  vals.forEach((v,i)=>{
+    const h=(H-pt-pb)*(v/max),w=Math.min(bw*0.62,34),x=i*bw+(bw-w)/2,y=H-pb-h;
+    if(v>0)s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="4" fill="'+color+'"/><text x="'+(x+w/2).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" text-anchor="middle" class="cv">'+v+'</text>';
+    s+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" class="ct">'+esc(labels[i])+'</text>';
+  });
+  return s+'</svg>';
+}
+function hbars(counts,color){
+  const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!arr.length)return EMPTY;
+  const max=arr[0][1];
+  return arr.map(([l,c])=>'<div class="hb"><span class="hl">'+(ICONS[l]?ICONS[l]+' ':'')+esc(l)+'</span><span class="ht"><i style="width:'+(c/max*100).toFixed(1)+'%;background:'+color+'"></i></span><span class="hc">'+c+'</span></div>').join('');
+}
+function phaseLegend(){
+  return '<div class="mini-legend">'+PH_ORDER.map(ph=>'<span><i class="bar ph-'+ph+'"></i>'+PHASES[ph][0].replace('Fase ','')+'</span>').join('')+'</div>';
+}
+function phaseStack(byPh,counts){
+  const keys=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).filter(x=>byPh[x]).slice(0,6);
+  if(!keys.length)return '';
+  let html='<div class="sub-h">¿En qué fase del ciclo aparecen?</div>';
+  const notes=[];
+  keys.forEach(key=>{
+    const o=byPh[key],tot=PH_ORDER.reduce((a,ph)=>a+(o[ph]||0),0);
+    html+='<div class="hb"><span class="hl">'+(ICONS[key]?ICONS[key]+' ':'')+esc(key)+'</span><span class="ht stack">'+
+      PH_ORDER.filter(ph=>o[ph]).map(ph=>'<i style="width:'+(o[ph]/tot*100).toFixed(1)+'%;background:'+PHASES[ph][2]+'" title="'+PHASES[ph][0]+': '+o[ph]+'"></i>').join('')+
+      '</span><span class="hc">'+tot+'</span></div>';
+    const top=PH_ORDER.slice().sort((a,b)=>(o[b]||0)-(o[a]||0))[0];
+    if(notes.length<3&&tot>=3&&(o[top]||0)/tot>=0.5)notes.push((ICONS[key]?ICONS[key]+' ':'')+esc(key)+': sobre todo en la '+PHASES[top][0].toLowerCase()+' ('+Math.round(o[top]/tot*100)+'% de los días).');
+  });
+  html+=phaseLegend();
+  if(notes.length)html+='<ul class="insights">'+notes.map(n=>'<li>'+n+'</li>').join('')+'</ul>';
+  return html;
+}
+function renderMetrics(st,fc){
+  const t=today(),from=mRange==='all'?null:new Date(t.getFullYear(),t.getMonth()-(+mRange),t.getDate());
+  const inR=d=>(!from||diff(from,d)>=0)&&diff(d,t)>=0;
+  const cyc=[];
+  for(let i=0;i<st.ps.length-1;i++){
+    const a=st.ps[i],L=diff(a.start,st.ps[i+1].start);
+    if(inR(a.start)&&L>=15&&L<=60)cyc.push({start:a.start,L});
+  }
+  const pers=st.ps.filter((x,i)=>inR(x.start)&&!(i===st.ps.length-1&&diff(x.end,t)<=1));
+  const sym={},mood={},sexCat={},symPh={},moodPh={},sexPh={},sexMonth={};
+  let logged=0,sexDays=0;
+  const bump=(o,key)=>{o[key]=(o[key]||0)+1;};
+  const bumpPh=(o,key,ph)=>{if(!ph)return;o[key]=o[key]||{};bump(o[key],ph);};
+  Object.keys(state.days).forEach(key=>{
+    const d=p(key);if(!inR(d))return;
+    const x=state.days[key],ph=(fc.map[key]||{}).phase;logged++;
+    (x.symptoms||[]).forEach(v=>{bump(sym,v);bumpPh(symPh,v,ph);});
+    (x.moods||[]).forEach(v=>{bump(mood,v);bumpPh(moodPh,v,ph);});
+    if((x.sex||[]).length){
+      sexDays++;bump(sexMonth,key.slice(0,7));if(ph)bump(sexPh,ph);
+      x.sex.forEach(v=>bump(sexCat,v));
+    }
+  });
+  const Ls=cyc.map(c=>c.L);
+  $('mStats').innerHTML=
+    '<div class="stat"><b>'+cyc.length+'</b><span>ciclos completos</span></div>'+
+    '<div class="stat"><b>'+(Ls.length?Math.min.apply(null,Ls)+'–'+Math.max.apply(null,Ls):'–')+'</b><span>ciclo más corto y más largo (días)</span></div>'+
+    '<div class="stat"><b>'+logged+'</b><span>días con registros</span></div>';
+  const recent=cyc.slice(-12);
+  $('mCycles').innerHTML=recent.length?barChart(recent.map(c=>c.L),recent.map(c=>MS[c.start.getMonth()]),'var(--lut)',{avg:Ls.reduce((a,b)=>a+b,0)/Ls.length,label:'Duración de tus ciclos'})+
+    (Ls.length>=2?'<p class="note-small" style="margin:8px 0 0">Tus ciclos variaron '+(Math.max.apply(null,Ls)-Math.min.apply(null,Ls))+' días entre el más corto y el más largo.</p>':''):
+    '<p class="empty">Necesitas al menos dos periodos registrados para ver la duración de tus ciclos.</p>';
+  const rp=pers.slice(-12);
+  $('mPeriods').innerHTML=rp.length?barChart(rp.map(x=>x.length),rp.map(x=>MS[x.start.getMonth()]),'var(--period)',{avg:rp.reduce((a,x)=>a+x.length,0)/rp.length,label:'Duración de tu periodo'}):EMPTY;
+  $('mSym').innerHTML=Object.keys(sym).length?hbars(sym,'var(--period)')+phaseStack(symPh,sym):EMPTY;
+  $('mMood').innerHTML=Object.keys(mood).length?hbars(mood,'var(--fol)')+phaseStack(moodPh,mood):EMPTY;
+  if(!sexDays){$('mSex').innerHTML=EMPTY;}
+  else{
+    const nM=mRange==='all'?12:+mRange,vals=[],labs=[];
+    for(let i=nM-1;i>=0;i--){const m=new Date(t.getFullYear(),t.getMonth()-i,1);vals.push(sexMonth[m.getFullYear()+'-'+pad(m.getMonth()+1)]||0);labs.push(MS[m.getMonth()]);}
+    let html=barChart(vals,labs,'var(--heart)',{label:'Actividad sexual por mes'});
+    html+='<div class="sub-h">Por tipo</div>'+hbars(sexCat,'var(--heart)');
+    const totPh=PH_ORDER.reduce((a,ph)=>a+(sexPh[ph]||0),0);
+    if(totPh){
+      html+='<div class="sub-h">Por fase del ciclo</div><div class="hb"><span class="hl">Todos los días</span><span class="ht stack">'+
+        PH_ORDER.filter(ph=>sexPh[ph]).map(ph=>'<i style="width:'+(sexPh[ph]/totPh*100).toFixed(1)+'%;background:'+PHASES[ph][2]+'" title="'+PHASES[ph][0]+': '+sexPh[ph]+'"></i>').join('')+
+        '</span><span class="hc">'+totPh+'</span></div>'+phaseLegend();
+    }
+    $('mSex').innerHTML=html;
+  }
+}
+$('metricRange').addEventListener('click',e=>{
+  const b=e.target.closest('[data-mrange]');if(!b)return;
+  mRange=b.dataset.mrange;
+  document.querySelectorAll('[data-mrange]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  renderAll();
 });
 
 $('themeChips').addEventListener('click',e=>{
