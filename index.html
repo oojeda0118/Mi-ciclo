@@ -181,6 +181,22 @@ textarea{min-height:90px;resize:vertical}
 .insights{margin:10px 0 0;padding:0;list-style:none;font-size:.9rem}
 .insights li{padding:3px 0}
 #metricRange{margin-bottom:14px}
+.info-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;margin:0 0 16px}
+.info-card h3{font-family:var(--serif);font-weight:400;font-size:1.2rem;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.info-card h3 i{width:12px;height:12px;border-radius:50%;flex:none}
+.info-card .lead{margin:0;color:var(--ink);font-size:.95rem}
+.info-card h4{font-size:.9rem;margin:16px 0 6px}
+.info-card .mine{display:flex;flex-wrap:wrap;gap:6px}
+.info-card .mine span{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.85rem}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--bg);margin-top:8px;font-size:.92rem}
+.alert.warn{background:var(--period-soft)}
+.alert.ok{background:var(--fertile-soft)}
+.alert .ai{flex:none;line-height:1.4}
+.info-card details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.info-card summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:4px 0}
+.info-card details ul{margin:8px 0 0;padding-left:1.2em;font-size:.9rem}
+.info-card details li{padding:2px 0}
+.info-card .foot{font-size:.8rem;color:var(--muted);margin:12px 0 0}
 .backup-banner{background:var(--surface);border:1.5px solid var(--period);border-radius:18px;padding:14px 16px;margin:6px 0 4px}
 .backup-banner p{margin:0 0 10px;font-size:.95rem}
 .backup-banner .actions{justify-content:flex-start}
@@ -236,6 +252,8 @@ textarea{min-height:90px;resize:vertical}
       <div class="forecast" id="forecast"></div>
       <div class="actions" id="heroActions"></div>
     </div>
+
+    <div class="info-card" id="infoCard" hidden></div>
 
     <div class="cal">
       <div class="cal-head">
@@ -681,7 +699,7 @@ function applyTheme(){
 
 function renderAll(){
   const st=stats(),fc=forecast(st);
-  renderHero(st,fc);renderCalendar(fc);renderCycles(st);renderMetrics(st,fc);renderSettings();
+  renderHero(st,fc);renderInsights(st,fc);renderCalendar(fc);renderCycles(st);renderMetrics(st,fc);renderSettings();
   if(!$('pLen').value)$('pLen').value=st.period;
 }
 
@@ -1020,6 +1038,94 @@ $('importFile').addEventListener('change',e=>{
 });
 // Pide al navegador que no borre los datos de esta página
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}
+
+// Tarjeta de información y avisos
+const PHASE_INFO={
+  menstrual:{lead:'Es normal sentir cólicos, dolor en la parte baja de la espalda, cansancio, hinchazón o dolor de cabeza. El calor local, el descanso y moverte suavemente pueden ayudar.',},
+  folicular:{lead:'Muchas personas notan más energía, mejor ánimo y la piel más clara. Es una buena etapa para actividades que piden más esfuerzo.'},
+  ovulatoria:{lead:'Puedes notar más flujo transparente y elástico, parecido a la clara de huevo, más deseo sexual y, a veces, una molestia leve en un lado del abdomen. Un manchado ligero ocasional también puede ocurrir.'},
+  lutea:{lead:'Pueden aparecer síntomas premenstruales: senos sensibles, hinchazón, antojos, acné, irritabilidad, cansancio o cambios en el sueño. Suelen intensificarse en los días antes del periodo.'}
+};
+function dayList(a,b){const out=[];for(let d=a;diff(d,b)>=0;d=add(d,1))out.push(d);return out;}
+function computeAlerts(st,fc){
+  const t=today(),A=[],ps=st.ps;
+  if(!ps.length)return A;
+  const last=ps[ps.length-1];
+  const todayFlow=(state.days[k(t)]||{}).flow;
+  const ongoing=PERIOD_FLOWS.includes(todayFlow)||diff(last.end,t)<=1;
+  // Retraso
+  if(fc.late>0){
+    if(fc.cycleDay>=90)A.push(['warn','🗓️','Llevas '+fc.cycleDay+' días desde tu último periodo. Pasar 3 meses o más sin periodo es motivo para consultar con tu ginecóloga.']);
+    else if(fc.late>=7)A.push(['warn','⏳','Tu periodo lleva '+fc.late+' días de retraso. Si tomas pastillas, a veces el sangrado de la semana de descanso es muy leve o no aparece; si olvidaste alguna o tienes dudas, una prueba de embarazo puede darte tranquilidad. Si el retraso continúa, coméntalo con tu ginecóloga.']);
+    else A.push(['','⏳','Tu periodo lleva '+fc.late+(fc.late===1?' día':' días')+' de retraso. Retrasos de pocos días son comunes y pueden deberse a estrés, viajes, cambios de rutina o enfermedad.']);
+  }
+  // Periodo largo (en curso o reciente)
+  if(ongoing&&last.length>8)A.push(['warn','🩸','Tu periodo actual lleva '+last.length+' días. Un sangrado de más de 8 días se considera prolongado; si continúa, consúltalo.']);
+  const done=ps.filter(x=>x!==last||!ongoing).slice(-3);
+  const longP=done.filter(x=>x.length>8);
+  if(longP.length&&!(ongoing&&last.length>8))A.push(['warn','🩸','Tu periodo del '+fmt(longP[longP.length-1].start)+' duró '+longP[longP.length-1].length+' días. Más de 8 días se considera prolongado; si se repite, coméntalo con tu ginecóloga.']);
+  // Flujo abundante
+  const recentP=ps.slice(-2);
+  for(let i=recentP.length-1;i>=0;i--){
+    const x=recentP[i],heavy=dayList(x.start,x.end).filter(d=>(state.days[k(d)]||{}).flow==='heavy').length;
+    if(heavy>=3){A.push(['warn','💧','Registraste '+heavy+' días de flujo abundante en tu periodo del '+fmt(x.start)+'. Si empapas una toalla o tampón cada hora durante varias horas, o tienes coágulos grandes, consulta con tu ginecóloga.']);break;}
+  }
+  // Duración del ciclo fuera de rango (24 a 38 días)
+  const cyc=[];for(let i=1;i<ps.length;i++)cyc.push({start:ps[i-1].start,L:diff(ps[i-1].start,ps[i].start)});
+  const recentC=cyc.slice(-3).filter(c=>c.L>=10&&c.L<=90);
+  const odd=recentC.filter(c=>c.L<24||c.L>38);
+  if(odd.length){
+    const c=odd[odd.length-1];
+    A.push([odd.length>=2?'warn':'','🔄','Tu ciclo que empezó el '+fmt(c.start)+' duró '+c.L+' días, fuera del rango habitual en adultas (24 a 38 días).'+(odd.length>=2?' Esto se ha repetido en tus últimos ciclos; vale la pena comentarlo con tu ginecóloga.':' Un ciclo aislado puede pasar; si se repite, coméntalo con tu ginecóloga.')]);
+  }
+  // Variación entre ciclos
+  const valid=cyc.slice(-6).map(c=>c.L).filter(L=>L>=15&&L<=60);
+  if(valid.length>=3){
+    const r=Math.max.apply(null,valid)-Math.min.apply(null,valid);
+    if(r>9)A.push(['','📊','Tus últimos ciclos variaron '+r+' días entre el más corto y el más largo. Una diferencia mayor a 7–9 días se considera irregular; si es nuevo para ti, coméntalo en tu próxima consulta.']);
+  }
+  // Manchado fuera del periodo (últimos 90 días)
+  const near=d=>ps.some(x=>diff(add(x.start,-3),d)>=0&&diff(d,add(x.end,3))>=0)||(fc.map[k(d)]||{}).pred;
+  const spots=Object.keys(state.days).filter(key=>{
+    const d=p(key);return state.days[key].flow==='spotting'&&diff(d,t)>=0&&diff(d,t)<=90&&!near(d);
+  }).sort();
+  if(spots.length)A.push(['','🔸','Registraste manchado fuera de tu periodo'+(spots.length>1?' en '+spots.length+' días':' el '+fmt(p(spots[0])))+'. Con pastillas anticonceptivas es común, sobre todo en los primeros meses o si olvidaste alguna. Si se repite, aparece después de las relaciones o viene con dolor, consúltalo.']);
+  return A;
+}
+function renderInsights(st,fc){
+  const card=$('infoCard');
+  if(!st.ps.length||!fc.phase){card.hidden=true;return;}
+  const ph=fc.phase,info=PHASE_INFO[ph];
+  // Lo que sueles registrar en esta fase
+  const counts={};
+  Object.keys(state.days).forEach(key=>{
+    if((fc.map[key]||{}).phase!==ph||diff(p(key),today())<0)return;
+    const x=state.days[key];
+    (x.symptoms||[]).concat(x.moods||[]).forEach(v=>counts[v]=(counts[v]||0)+1);
+  });
+  const mine=Object.entries(counts).filter(e=>e[1]>=2).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const alerts=computeAlerts(st,fc);
+  let h='<h3><i style="background:'+PHASES[ph][2]+'"></i>Qué esperar en tu '+PHASES[ph][0].toLowerCase()+'</h3>';
+  h+='<p class="lead">'+info.lead+'</p>';
+  if(mine.length){
+    h+='<h4>Lo que sueles registrar en esta fase</h4><div class="mine">'+
+      mine.map(e=>'<span>'+(ICONS[e[0]]?ICONS[e[0]]+' ':'')+esc(e[0])+'</span>').join('')+'</div>';
+  }
+  h+='<h4>Avisos</h4>';
+  if(alerts.length)h+=alerts.map(a=>'<div class="alert '+a[0]+'"><span class="ai" aria-hidden="true">'+a[1]+'</span><span>'+a[2]+'</span></div>').join('');
+  else h+='<div class="alert ok"><span class="ai" aria-hidden="true">✓</span><span>No veo nada fuera de lo habitual en tus registros recientes.</span></div>';
+  h+='<details><summary>Cuándo consultar con tu ginecóloga</summary><ul>'+
+    '<li>Empapas una toalla o tampón cada hora durante varias horas seguidas.</li>'+
+    '<li>Expulsas coágulos más grandes que una moneda grande.</li>'+
+    '<li>Tu periodo dura más de 8 días.</li>'+
+    '<li>Tienes sangrado entre periodos o después de las relaciones, y se repite.</li>'+
+    '<li>El dolor es intenso, no mejora con analgésicos o te impide hacer tus actividades.</li>'+
+    '<li>Pasas 3 meses o más sin periodo sin estar embarazada.</li>'+
+    '<li>Tienes fiebre, mareos o te sientes muy débil durante el sangrado.</li>'+
+    '</ul></details>';
+  h+='<p class="foot">Si tomas pastillas anticonceptivas, tus hormonas son más estables y estos síntomas pueden ser distintos o más leves. Esta información es orientativa y no reemplaza una consulta médica.</p>';
+  card.innerHTML=h;card.hidden=false;
+}
 
 $('themeChips').addEventListener('click',e=>{
   const b=e.target.closest('[data-theme-val]');if(!b)return;
