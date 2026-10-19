@@ -197,6 +197,8 @@ textarea{min-height:90px;resize:vertical}
 .info-card details ul{margin:8px 0 0;padding-left:1.2em;font-size:.9rem}
 .info-card details li{padding:2px 0}
 .info-card .foot{font-size:.8rem;color:var(--muted);margin:12px 0 0}
+.hb.wide{grid-template-columns:minmax(7.5em,40%) 1fr 3.6em}
+.info-card h3 svg{width:16px;height:16px;fill:var(--heart);flex:none}
 .backup-banner{background:var(--surface);border:1.5px solid var(--period);border-radius:18px;padding:14px 16px;margin:6px 0 4px}
 .backup-banner p{margin:0 0 10px;font-size:.95rem}
 .backup-banner .actions{justify-content:flex-start}
@@ -254,6 +256,7 @@ textarea{min-height:90px;resize:vertical}
     </div>
 
     <div class="info-card" id="infoCard" hidden></div>
+    <div class="info-card" id="sexCard" hidden></div>
 
     <div class="cal">
       <div class="cal-head">
@@ -406,6 +409,10 @@ textarea{min-height:90px;resize:vertical}
   <div class="chips" data-group="symptoms"></div>
   <h3><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.2 4.4 2.6.8-1.4 2.3-2.6 4.4-2.6 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"/></svg>Actividad sexual</h3>
   <div class="chips sex" data-group="sex"></div>
+  <h3>Después de la actividad</h3>
+  <div class="chips" data-group="sexSigns"></div>
+  <h3>Deseo sexual</h3>
+  <div class="chips" data-group="libido"></div>
   <h3>Nota</h3>
   <textarea id="noteBox" placeholder="Algo que quieras recordar de este día"></textarea>
   <div class="sheet-foot">
@@ -426,13 +433,16 @@ const OPTIONS={
   flow:[['none','Sin periodo'],['spotting','Manchado'],['light','Ligero'],['medium','Medio'],['heavy','Abundante']],
   moods:['Feliz','Tranquila','Con energía','Sensible','Irritable','Ansiosa','Triste','Cansada'],
   symptoms:['Cólicos','Dolor de cabeza','Hinchazón','Senos sensibles','Acné','Dolor de espalda','Náuseas','Antojos','Insomnio','Flujo'],
-  sex:['Con condón','Con pastillas','Sin protección','Oral','Masturbación','Con juguete','Otra']
+  sex:['Con condón','Con pastillas','Sin protección','Oral','Masturbación','Con juguete','Otra'],
+  sexSigns:['Dolor durante','Sangrado después','Ardor al orinar'],
+  libido:['Bajo','Medio','Alto']
 };
 const PERIOD_FLOWS=['light','medium','heavy'];
 const ICONS={
   none:'🚫',spotting:'💧',light:'🩸',medium:'🩸🩸',heavy:'🩸🩸🩸',
   'Feliz':'😊','Tranquila':'😌','Con energía':'⚡','Sensible':'🥺','Irritable':'😤','Ansiosa':'😰','Triste':'😢','Cansada':'😴',
-  'Cólicos':'🌀','Dolor de cabeza':'🤕','Hinchazón':'🎈','Senos sensibles':'💗','Acné':'🔴','Dolor de espalda':'🦴','Náuseas':'🤢','Antojos':'🍫','Insomnio':'🌙','Flujo':'💦'
+  'Cólicos':'🌀','Dolor de cabeza':'🤕','Hinchazón':'🎈','Senos sensibles':'💗','Acné':'🔴','Dolor de espalda':'🦴','Náuseas':'🤢','Antojos':'🍫','Insomnio':'🌙','Flujo':'💦',
+  'Dolor durante':'😖','Sangrado después':'🔻','Ardor al orinar':'🔥','Bajo':'😶','Medio':'🙂','Alto':'😍'
 };
 
 // Fechas (siempre en hora local)
@@ -622,7 +632,7 @@ function renderCalendar(fc){
     let extra='';
     if(m.ov&&!isPeriod)extra+=OVI;
     if(data&&data.sex&&data.sex.length)extra+=HEART;
-    if(data&&((data.moods&&data.moods.length)||(data.symptoms&&data.symptoms.length)||(data.note&&data.note.trim())))extra+='<i class="dot"></i>';
+    if(data&&((data.moods&&data.moods.length)||(data.symptoms&&data.symptoms.length)||(data.sexSigns&&data.sexSigns.length)||data.libido||(data.note&&data.note.trim())))extra+='<i class="dot"></i>';
     let bar='';
     if(m.phase){
       const pv=fc.map[k(add(date,-1))]||{},nx=fc.map[k(add(date,1))]||{};
@@ -699,14 +709,17 @@ function applyTheme(){
 
 function renderAll(){
   const st=stats(),fc=forecast(st);
-  renderHero(st,fc);renderInsights(st,fc);renderCalendar(fc);renderCycles(st);renderMetrics(st,fc);renderSettings();
+  renderHero(st,fc);renderInsights(st,fc);renderSexHealth(st,fc);renderCalendar(fc);renderCycles(st);renderMetrics(st,fc);renderSettings();
   if(!$('pLen').value)$('pLen').value=st.period;
 }
 
 // Hoja de registro diario
-function dayData(){return Object.assign({flow:'none',moods:[],symptoms:[],sex:[],note:''},state.days[sel]||{});}
+function dayData(){return Object.assign({flow:'none',moods:[],symptoms:[],sex:[],sexSigns:[],libido:'',note:''},state.days[sel]||{});}
+function isEmptyDay(d){
+  return (!d.flow||d.flow==='none')&&!(d.moods||[]).length&&!(d.symptoms||[]).length&&!(d.sex||[]).length&&!(d.sexSigns||[]).length&&!d.libido&&!(d.note||'').trim();
+}
 function commit(d){
-  const empty=(!d.flow||d.flow==='none')&&!d.moods.length&&!d.symptoms.length&&!d.sex.length&&!(d.note||'').trim();
+  const empty=isEmptyDay(d);
   if(empty)delete state.days[sel];else state.days[sel]=d;
   save();renderAll();
 }
@@ -717,7 +730,7 @@ function renderSheet(){
     const g=box.dataset.group;
     box.innerHTML=OPTIONS[g].map(o=>{
       const val=Array.isArray(o)?o[0]:o,lab=Array.isArray(o)?o[1]:o;
-      const on=g==='flow'?(d.flow||'none')===val:d[g].includes(val);
+      const on=g==='flow'?(d.flow||'none')===val:g==='libido'?d.libido===val:(d[g]||[]).includes(val);
       const ic=ICONS[val]?'<span class="ic" aria-hidden="true">'+ICONS[val]+'</span>':'';
       return '<button class="chip" data-val="'+val+'" aria-pressed="'+on+'">'+ic+lab+'</button>';
     }).join('');
@@ -734,7 +747,8 @@ document.querySelectorAll('.sheet .chips').forEach(box=>box.addEventListener('cl
   const b=e.target.closest('.chip');if(!b||!sel)return;
   const g=box.dataset.group,v=b.dataset.val,d=dayData();
   if(g==='flow')d.flow=v;
-  else d[g]=d[g].includes(v)?d[g].filter(x=>x!==v):d[g].concat(v);
+  else if(g==='libido')d.libido=d.libido===v?'':v;
+  else{const a=d[g]||[];d[g]=a.includes(v)?a.filter(x=>x!==v):a.concat(v);}
   commit(d);renderSheet();
 }));
 $('noteBox').addEventListener('input',e=>{if(!sel)return;const d=dayData();d.note=e.target.value;commit(d);});
@@ -789,7 +803,7 @@ $('history').addEventListener('click',e=>{
       const key=k(d),x=state.days[key];
       if(x&&PERIOD_FLOWS.includes(x.flow)){
         x.flow='none';
-        if(!x.moods.length&&!x.symptoms.length&&!x.sex.length&&!(x.note||'').trim())delete state.days[key];
+        if(isEmptyDay(x))delete state.days[key];
       }
     }
     save();renderAll();toast('Periodo eliminado');
@@ -885,19 +899,19 @@ $('exportXlsx').addEventListener('click',async()=>{
     cyc.push([fmtD(p0.start),fmtD(p0.end),p0.length,nx?diff(p0.start,nx.start):'En curso']);
   });
   const head=['Fecha','Día del ciclo','Fase estimada','Flujo','Estado de ánimo','Síntomas'];
-  if(inc)head.push('Actividad sexual');
+  if(inc)head.push('Actividad sexual','Después de la actividad','Deseo sexual');
   head.push('Nota');
   const daily=[head];
   Object.keys(state.days).sort().forEach(key=>{
     const d=p(key);if(!inRange(d))return;
     const x=state.days[key];
-    const flow=FL[x.flow]||'',moods=(x.moods||[]).join(', '),sym=(x.symptoms||[]).join(', '),sex=inc?(x.sex||[]).join(', '):'',note=(x.note||'').trim();
-    if(!flow&&!moods&&!sym&&!sex&&!note)return;
+    const flow=FL[x.flow]||'',moods=(x.moods||[]).join(', '),sym=(x.symptoms||[]).join(', '),sex=inc?(x.sex||[]).join(', '):'',signs=inc?(x.sexSigns||[]).join(', '):'',lib=inc?(x.libido||''):'',note=(x.note||'').trim();
+    if(!flow&&!moods&&!sym&&!sex&&!signs&&!lib&&!note)return;
     let cd='';
     for(let i=st.ps.length-1;i>=0;i--){const n=diff(st.ps[i].start,d);if(n>=0){if(n<60)cd=n+1;break;}}
     const m=fc.map[key]||{};
     const row=[fmtD(d),cd,m.phase?PHASES[m.phase][0]:'',flow,moods,sym];
-    if(inc)row.push(sex);
+    if(inc)row.push(sex,signs,lib);
     row.push(note);
     daily.push(row);
   });
@@ -1001,7 +1015,9 @@ function renderMetrics(st,fc){
   $('mPeriods').innerHTML=rp.length?barChart(rp.map(x=>x.length),rp.map(x=>MS[x.start.getMonth()]),'var(--period)',{avg:rp.reduce((a,x)=>a+x.length,0)/rp.length,label:'Duración de tu periodo'}):EMPTY;
   $('mSym').innerHTML=Object.keys(sym).length?hbars(sym,'var(--period)')+phaseStack(symPh,sym):EMPTY;
   $('mMood').innerHTML=Object.keys(mood).length?hbars(mood,'var(--fol)')+phaseStack(moodPh,mood):EMPTY;
-  if(!sexDays){$('mSex').innerHTML=EMPTY;}
+  const lib=libidoByPhase(fc,inR);
+  if(!sexDays&&!lib){$('mSex').innerHTML=EMPTY;}
+  else if(!sexDays){$('mSex').innerHTML=lib;}
   else{
     const nM=mRange==='all'?12:+mRange,vals=[],labs=[];
     for(let i=nM-1;i>=0;i--){const m=new Date(t.getFullYear(),t.getMonth()-i,1);vals.push(sexMonth[m.getFullYear()+'-'+pad(m.getMonth()+1)]||0);labs.push(MS[m.getMonth()]);}
@@ -1013,7 +1029,7 @@ function renderMetrics(st,fc){
         PH_ORDER.filter(ph=>sexPh[ph]).map(ph=>'<i style="width:'+(sexPh[ph]/totPh*100).toFixed(1)+'%;background:'+PHASES[ph][2]+'" title="'+PHASES[ph][0]+': '+sexPh[ph]+'"></i>').join('')+
         '</span><span class="hc">'+totPh+'</span></div>'+phaseLegend();
     }
-    $('mSex').innerHTML=html;
+    $('mSex').innerHTML=html+lib;
   }
 }
 $('metricRange').addEventListener('click',e=>{
@@ -1124,6 +1140,79 @@ function renderInsights(st,fc){
     '<li>Tienes fiebre, mareos o te sientes muy débil durante el sangrado.</li>'+
     '</ul></details>';
   h+='<p class="foot">Si tomas pastillas anticonceptivas, tus hormonas son más estables y estos síntomas pueden ser distintos o más leves. Esta información es orientativa y no reemplaza una consulta médica.</p>';
+  card.innerHTML=h;card.hidden=false;
+}
+
+// Deseo sexual y salud sexual
+const LIB_VAL={'Bajo':1,'Medio':2,'Alto':3};
+function libAverages(fc,inR){
+  const sum={},cnt={};let n=0;
+  Object.keys(state.days).forEach(key=>{
+    const x=state.days[key],v=LIB_VAL[x.libido];if(!v)return;
+    if(inR&&!inR(p(key)))return;
+    const ph=(fc.map[key]||{}).phase;if(!ph)return;
+    sum[ph]=(sum[ph]||0)+v;cnt[ph]=(cnt[ph]||0)+1;n++;
+  });
+  const avg={};Object.keys(cnt).forEach(ph=>avg[ph]=sum[ph]/cnt[ph]);
+  return {avg,n};
+}
+const libLabel=a=>a<1.67?'Bajo':a<2.34?'Medio':'Alto';
+function libidoByPhase(fc,inR){
+  const r=libAverages(fc,inR);if(!r.n)return '';
+  let h='<div class="sub-h">Deseo sexual promedio por fase</div>';
+  PH_ORDER.forEach(ph=>{
+    if(r.avg[ph]==null)return;const a=r.avg[ph];
+    h+='<div class="hb wide"><span class="hl">'+PHASES[ph][0].replace('Fase ','').replace(/^./,c=>c.toUpperCase())+'</span><span class="ht"><i style="width:'+(a/3*100).toFixed(1)+'%;background:'+PHASES[ph][2]+'"></i></span><span class="hc">'+libLabel(a)+'</span></div>';
+  });
+  return h;
+}
+function renderSexHealth(st,fc){
+  const card=$('sexCard'),t=today();
+  const keys=Object.keys(state.days);
+  const any=keys.some(key=>{const x=state.days[key];return (x.sex||[]).length||(x.sexSigns||[]).length||x.libido;});
+  if(!any){card.hidden=true;return;}
+  const A=[];
+  // Relación sin protección reciente
+  const unprot=keys.filter(key=>(state.days[key].sex||[]).includes('Sin protección')&&diff(p(key),t)>=0&&diff(p(key),t)<=5).sort();
+  if(unprot.length){
+    const du=p(unprot[unprot.length-1]);
+    A.push(['warn','💊','Registraste actividad sin protección el '+fmt(du)+'. Si olvidaste alguna pastilla en los días anteriores, la anticoncepción de emergencia funciona mejor mientras antes se tome: algunas sirven hasta 3 días después y otras hasta 5. Si te preocupa un embarazo, una prueba es confiable desde el primer día de retraso, o unas 3 semanas después de la relación (alrededor del '+fmt(add(du,21))+').']);
+  }
+  // Señales después de la actividad (últimos 90 días)
+  const sig={};
+  keys.forEach(key=>{const d=p(key);if(diff(d,t)<0||diff(d,t)>90)return;(state.days[key].sexSigns||[]).forEach(v=>{(sig[v]=sig[v]||[]).push(key);});});
+  const last=v=>fmt(p(sig[v].sort()[sig[v].length-1]));
+  if(sig['Sangrado después']){
+    const c=sig['Sangrado después'].length;
+    A.push(c>=2?['warn','🔻','Registraste sangrado después de las relaciones '+c+' veces en los últimos 3 meses. Cuando se repite, conviene consultarlo con tu ginecóloga.']
+      :['','🔻','Registraste sangrado después de una relación el '+last('Sangrado después')+'. Puede pasar de forma ocasional; si se repite, consúltalo.']);
+  }
+  if(sig['Dolor durante']){
+    const c=sig['Dolor durante'].length;
+    A.push(c>=2?['warn','😖','Registraste dolor durante las relaciones '+c+' veces en los últimos 3 meses. El dolor frecuente no es algo que debas aguantar: suele tener causas tratables y vale la pena consultarlo.']
+      :['','😖','Registraste dolor durante una relación el '+last('Dolor durante')+'. Si se repite, coméntalo con tu ginecóloga.']);
+  }
+  if(sig['Ardor al orinar']&&sig['Ardor al orinar'].some(key=>diff(p(key),t)<=14)){
+    A.push(['warn','🔥','Registraste ardor al orinar el '+last('Ardor al orinar')+'. Puede ser señal de una infección urinaria. Si viene con ganas frecuentes de orinar, orina turbia o con sangre, fiebre o dolor en la espalda, consulta pronto. Orinar después de las relaciones y tomar suficiente agua pueden ayudar a prevenirlas.']);
+  }
+  // Patrón de deseo
+  const lr=libAverages(fc,null),phs=Object.keys(lr.avg);
+  if(lr.n>=6&&phs.length>=2){
+    phs.sort((a,b)=>lr.avg[b]-lr.avg[a]);
+    const hi=phs[0],lo=phs[phs.length-1];
+    if(lr.avg[hi]-lr.avg[lo]>=0.7)A.push(['','💗','Tu deseo sexual suele ser más alto en la '+PHASES[hi][0].toLowerCase()+' y más bajo en la '+PHASES[lo][0].toLowerCase()+'.']);
+  }
+  let h='<h3>'+HEART.replace('class="heart"','')+'Salud sexual</h3>';
+  if(A.length)h+=A.map(a=>'<div class="alert '+a[0]+'"><span class="ai" aria-hidden="true">'+a[1]+'</span><span>'+a[2]+'</span></div>').join('');
+  else h+='<div class="alert ok"><span class="ai" aria-hidden="true">✓</span><span>Sin avisos por ahora.</span></div>';
+  h+='<details><summary>Bueno saber</summary><ul>'+
+    '<li>Las pastillas previenen el embarazo, pero no protegen contra infecciones de transmisión sexual; solo el condón lo hace.</li>'+
+    '<li>Pregúntale a tu ginecóloga cada cuánto hacerte chequeos de infecciones de transmisión sexual según tu situación, sobre todo si tienes una pareja nueva.</li>'+
+    '<li>Vomitar o tener diarrea fuerte pocas horas después de tomar la pastilla, y algunos medicamentos (como ciertos anticonvulsivos, la rifampicina o la hierba de San Juan), pueden reducir su efectividad.</li>'+
+    '<li>Orinar después de las relaciones puede ayudar a prevenir infecciones urinarias.</li>'+
+    '<li>El sangrado después de las relaciones o el dolor frecuente durante ellas no son normales y tienen tratamiento.</li>'+
+    '</ul></details>';
+  h+='<p class="foot">Información orientativa; no reemplaza una consulta médica.</p>';
   card.innerHTML=h;card.hidden=false;
 }
 
