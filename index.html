@@ -110,6 +110,7 @@ main{max-width:480px;margin:0 auto;padding:12px 16px 120px}
 .day.spot .c{background:var(--period-soft)}
 .day.ovulation .c{background:var(--fertile);color:var(--on-fertile);font-weight:600;border-color:transparent}
 .day.period .c{background:var(--period);color:var(--on-period);font-weight:600;border-color:transparent}
+.day.period.auto .c{background:var(--period-soft);color:var(--ink);border:2px solid var(--period)}
 .day.today .num{font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 .day .heart{position:absolute;top:-4px;right:-4px;width:17px;height:17px;fill:var(--heart);stroke:var(--surface);stroke-width:2.5;paint-order:stroke}
 .ovi{width:16px;height:16px;flex:none}
@@ -130,6 +131,7 @@ main{max-width:480px;margin:0 auto;padding:12px 16px 120px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:14px;height:14px;border-radius:50%;display:inline-block}
 .sw.p{background:var(--period)}
+.sw.pa{background:var(--period-soft);border:2px solid var(--period)}
 .sw.pr{border:2px dashed var(--period)}
 .sw.f{background:var(--fertile-soft)}
 .sw.o{background:var(--fertile)}
@@ -270,6 +272,7 @@ textarea{min-height:90px;resize:vertical}
       <div class="grid" id="grid"></div>
       <div class="legend">
         <span><i class="sw p"></i>Periodo</span>
+        <span><i class="sw pa"></i>Periodo sin confirmar</span>
         <span><i class="sw pr"></i>Periodo previsto</span>
         <span><i class="sw f"></i>Ventana fértil</span>
         <span><svg class="ovi" viewBox="0 0 24 24" aria-hidden="true"><circle class="o1" cx="12" cy="12" r="9"/><circle class="o2" cx="12" cy="12" r="3.5"/></svg>Ovulación estimada</span>
@@ -344,6 +347,7 @@ textarea{min-height:90px;resize:vertical}
         <div><label for="sCycle">Duración del ciclo</label><input type="number" id="sCycle" min="15" max="60" inputmode="numeric"></div>
         <div><label for="sPeriod">Duración del periodo</label><input type="number" id="sPeriod" min="1" max="12" inputmode="numeric"></div>
       </div>
+      <div style="margin-top:12px"><label for="sAuto">Días que se marcan al registrar el primer día del periodo (0 para desactivar)</label><input type="number" id="sAuto" min="0" max="12" inputmode="numeric"></div>
       <button class="secondary" id="saveSettings">Guardar valores</button>
     </div>
 
@@ -402,6 +406,7 @@ textarea{min-height:90px;resize:vertical}
     <button class="ghost" id="closeSheet">Listo</button>
   </div>
   <h3>Periodo</h3>
+  <p class="note-small" id="autoNote" style="margin:0 0 8px" hidden>Este día se marcó automáticamente. Toca un tipo de flujo para confirmarlo, o “Sin periodo” para quitarlo junto con los días automáticos que le siguen.</p>
   <div class="chips flow" data-group="flow"></div>
   <h3>Estado de ánimo</h3>
   <div class="chips" data-group="moods"></div>
@@ -622,6 +627,7 @@ function renderCalendar(fc){
     const cls=['day'];
     const isPeriod=data&&PERIOD_FLOWS.includes(data.flow);
     if(isPeriod)cls.push('period');
+    if(isPeriod&&data.auto)cls.push('auto');
     else if(data&&data.flow==='spotting')cls.push('spot');
     else{
       if(m.pred)cls.push('pred');
@@ -671,6 +677,7 @@ function renderCycles(st){
 function renderSettings(){
   $('sCycle').value=state.settings.cycle;
   $('sPeriod').value=state.settings.period;
+  $('sAuto').value=autoN();
   $('exportBox').value=JSON.stringify(state);
   applyTheme();
   renderBackup();
@@ -736,6 +743,7 @@ function renderSheet(){
     }).join('');
   });
   $('noteBox').value=d.note||'';
+  $('autoNote').hidden=!(d.auto&&PERIOD_FLOWS.includes(d.flow));
 }
 function openSheet(key){
   sel=key;renderSheet();
@@ -746,7 +754,16 @@ function closeSheet(){$('backdrop').classList.remove('open');$('sheet').classLis
 document.querySelectorAll('.sheet .chips').forEach(box=>box.addEventListener('click',e=>{
   const b=e.target.closest('.chip');if(!b||!sel)return;
   const g=box.dataset.group,v=b.dataset.val,d=dayData();
-  if(g==='flow')d.flow=v;
+  if(g==='flow'){
+    const wasP=PERIOD_FLOWS.includes(d.flow),nowP=PERIOD_FLOWS.includes(v);
+    d.flow=v;delete d.auto;
+    commit(d);
+    let msg='';
+    if(nowP&&!wasP){const a=autoFill(sel);if(a)msg='Se marcaron '+(a+1)+' días de periodo; puedes ajustarlos';}
+    if(!nowP&&wasP){const r=clearAutoAfter(sel);if(r)msg='También se quitaron los días automáticos siguientes';}
+    if(msg){save();renderAll();toast(msg);}
+    renderSheet();return;
+  }
   else if(g==='libido')d.libido=d.libido===v?'':v;
   else{const a=d[g]||[];d[g]=a.includes(v)?a.filter(x=>x!==v):a.concat(v);}
   commit(d);renderSheet();
@@ -755,7 +772,12 @@ $('noteBox').addEventListener('input',e=>{if(!sel)return;const d=dayData();d.not
 $('closeSheet').addEventListener('click',closeSheet);
 $('backdrop').addEventListener('click',closeSheet);
 $('clearDay').addEventListener('click',function(){
-  confirmTap(this,'Toca de nuevo para borrar',()=>{delete state.days[sel];save();renderAll();renderSheet();toast('Día borrado');});
+  confirmTap(this,'Toca de nuevo para borrar',()=>{
+    const wasP=PERIOD_FLOWS.includes((state.days[sel]||{}).flow);
+    delete state.days[sel];
+    const r=wasP?clearAutoAfter(sel):0;
+    save();renderAll();renderSheet();toast(r?'Día borrado junto con los días automáticos siguientes':'Día borrado');
+  });
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sel)closeSheet();});
 
@@ -812,10 +834,11 @@ $('history').addEventListener('click',e=>{
 
 // Ajustes
 $('saveSettings').addEventListener('click',()=>{
-  const c=parseInt($('sCycle').value,10),pl=parseInt($('sPeriod').value,10);
+  const c=parseInt($('sCycle').value,10),pl=parseInt($('sPeriod').value,10),au=parseInt($('sAuto').value,10);
   if(!(c>=15&&c<=60)){toast('El ciclo debe ser de 15 a 60 días');return;}
   if(!(pl>=1&&pl<=12)){toast('El periodo debe ser de 1 a 12 días');return;}
-  state.settings.cycle=c;state.settings.period=pl;save();renderAll();toast('Valores guardados');
+  if(!(au>=0&&au<=12)){toast('Los días automáticos deben ser de 0 a 12');return;}
+  state.settings.cycle=c;state.settings.period=pl;state.settings.autoDays=au;save();renderAll();toast('Valores guardados');
 });
 $('copyBackup').addEventListener('click',()=>{
   const box=$('exportBox'),text=box.value;
@@ -905,7 +928,7 @@ $('exportXlsx').addEventListener('click',async()=>{
   Object.keys(state.days).sort().forEach(key=>{
     const d=p(key);if(!inRange(d))return;
     const x=state.days[key];
-    const flow=FL[x.flow]||'',moods=(x.moods||[]).join(', '),sym=(x.symptoms||[]).join(', '),sex=inc?(x.sex||[]).join(', '):'',signs=inc?(x.sexSigns||[]).join(', '):'',lib=inc?(x.libido||''):'',note=(x.note||'').trim();
+    const flow=(FL[x.flow]||'')+(x.auto&&FL[x.flow]?' (sin confirmar)':''),moods=(x.moods||[]).join(', '),sym=(x.symptoms||[]).join(', '),sex=inc?(x.sex||[]).join(', '):'',signs=inc?(x.sexSigns||[]).join(', '):'',lib=inc?(x.libido||''):'',note=(x.note||'').trim();
     if(!flow&&!moods&&!sym&&!sex&&!signs&&!lib&&!note)return;
     let cd='';
     for(let i=st.ps.length-1;i>=0;i--){const n=diff(st.ps[i].start,d);if(n>=0){if(n<60)cd=n+1;break;}}
@@ -1214,6 +1237,34 @@ function renderSexHealth(st,fc){
     '</ul></details>';
   h+='<p class="foot">Información orientativa; no reemplaza una consulta médica.</p>';
   card.innerHTML=h;card.hidden=false;
+}
+
+// Días de periodo automáticos
+function autoN(){const n=state.settings.autoDays;return n==null?6:+n;}
+function autoFill(startKey){
+  const n=autoN();if(n<=1)return 0;
+  const d0=p(startKey);
+  for(let i=1;i<=3;i++){const x=state.days[k(add(d0,-i))];if(x&&PERIOD_FLOWS.includes(x.flow))return 0;}
+  let added=0;
+  for(let i=1;i<n;i++){
+    const key=k(add(d0,i));
+    const x=Object.assign({flow:'none',moods:[],symptoms:[],sex:[],sexSigns:[],libido:'',note:''},state.days[key]||{});
+    if(PERIOD_FLOWS.includes(x.flow))break;
+    if(x.flow==='spotting')continue;
+    x.flow='medium';x.auto=true;state.days[key]=x;added++;
+  }
+  return added;
+}
+function clearAutoAfter(key){
+  let d=add(p(key),1),removed=0;
+  for(;;){
+    const kk=k(d),x=state.days[kk];
+    if(!x||!x.auto)break;
+    x.flow='none';delete x.auto;
+    if(isEmptyDay(x))delete state.days[kk];
+    removed++;d=add(d,1);
+  }
+  return removed;
 }
 
 $('themeChips').addEventListener('click',e=>{
