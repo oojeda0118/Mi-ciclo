@@ -199,6 +199,38 @@ textarea{min-height:90px;resize:vertical}
 .info-card details ul{margin:8px 0 0;padding-left:1.2em;font-size:.9rem}
 .info-card details li{padding:2px 0}
 .info-card .foot{font-size:.8rem;color:var(--muted);margin:12px 0 0}
+.now-day{font-family:var(--serif);font-weight:400;font-size:1.6rem;margin:0 0 12px}
+.tl{position:relative;height:14px;border-radius:7px;background:var(--line);margin:4px 0 8px}
+.tl i{position:absolute;top:0;bottom:0;border-radius:7px}
+.tl .mk{position:absolute;top:-5px;width:4px;height:24px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+.tl-labels{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;color:var(--muted)}
+.friendly{margin:14px 0 0;font-size:.95rem;color:var(--ink)}
+.friendly+.friendly{margin-top:6px}
+.hcard{border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:10px}
+.hhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hmonth{font-weight:600}
+.hbadge{font-size:.78rem;padding:3px 10px;border-radius:999px;background:var(--fertile-soft);color:var(--ink)}
+.hbadge.warn{background:var(--period-soft)}
+.hsub{font-size:.9rem;color:var(--muted);margin-top:2px}
+.hbar{position:relative;height:10px;border-radius:5px;background:var(--line);margin:10px 0 6px;overflow:hidden;min-width:20%}
+.hbar i{position:absolute;top:0;bottom:0;left:0}
+.hfoot{font-size:.9rem}
+.hact{display:flex;gap:16px;margin-top:6px}
+.hact button{background:none;border:none;padding:6px 0;font-size:.85rem;color:var(--muted);text-decoration:underline}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-size:1.3rem;line-height:1}
+.stepper input{width:72px;text-align:center}
+.facts{list-style:none;margin:0;padding:0}
+.facts li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.facts li:last-child{border-bottom:none}
+.facts .fi{flex:none;width:1.4em;text-align:center}
+.rank{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.rank:last-child{border-bottom:none}
+.rank .rn{font-weight:600}
+.rank .rc{color:var(--muted);text-align:right}
+.rank .rp{grid-column:1/-1;font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.rank .rp i{width:8px;height:8px;border-radius:50%;flex:none}
+.cap{font-size:.82rem;color:var(--muted);margin:8px 0 0}
 .hb.wide{grid-template-columns:minmax(7.5em,40%) 1fr 3.6em}
 .info-card h3 svg{width:16px;height:16px;fill:var(--heart);flex:none}
 .backup-banner{background:var(--surface);border:1.5px solid var(--period);border-radius:18px;padding:14px 16px;margin:6px 0 4px}
@@ -291,22 +323,26 @@ textarea{min-height:90px;resize:vertical}
   <!-- Ciclos -->
   <section id="v-cycles" hidden>
     <h2 class="title">Tus ciclos</h2>
-    <div class="stats" id="stats"></div>
-    <p class="note-small" id="statsNote" style="margin-top:4px"></p>
+    <div class="panel" style="margin-top:0" id="cycleNow"></div>
 
     <div class="panel">
-      <h3>Agregar un periodo pasado</h3>
-      <p>Útil para cargar tu historial. Marca esos días como periodo con flujo medio; luego puedes ajustar cada día en el calendario.</p>
-      <div class="row">
-        <div><label for="pStart">Primer día</label><input type="date" id="pStart"></div>
-        <div><label for="pLen">Días</label><input type="number" id="pLen" min="1" max="12" inputmode="numeric"></div>
-      </div>
-      <button class="secondary" id="addPeriod">Agregar periodo</button>
+      <h3>Tu historial</h3>
+      <p>Cada tarjeta es un ciclo. En la barra, la parte rosa es tu periodo y la barra completa es lo que duró el ciclo.</p>
+      <div id="history"></div>
     </div>
 
     <div class="panel">
-      <h3>Historial</h3>
-      <ul class="list" id="history"></ul>
+      <h3>¿Tienes periodos anteriores?</h3>
+      <p>Agrégalos para que las predicciones sean más precisas. Después puedes ajustar cada día tocándolo en el calendario.</p>
+      <label for="pStart">¿Qué día empezó?</label>
+      <input type="date" id="pStart">
+      <label for="pLen" style="margin-top:14px">¿Cuántos días duró?</label>
+      <div class="stepper">
+        <button id="pMinus" aria-label="Un día menos">−</button>
+        <input type="number" id="pLen" min="1" max="12" inputmode="numeric">
+        <button id="pPlus" aria-label="Un día más">+</button>
+      </div>
+      <button class="primary" id="addPeriod">Agregar a mi historial</button>
     </div>
   </section>
 
@@ -318,12 +354,12 @@ textarea{min-height:90px;resize:vertical}
       <button class="chip" data-mrange="12" aria-pressed="false">Últimos 12 meses</button>
       <button class="chip" data-mrange="all" aria-pressed="false">Todo</button>
     </div>
-    <div class="stats" id="mStats"></div>
-    <div class="panel"><h3>Duración de tus ciclos</h3><p>Días desde el inicio de un periodo hasta el siguiente.</p><div id="mCycles"></div></div>
-    <div class="panel"><h3>Duración de tu periodo</h3><p>Días de sangrado en cada ciclo.</p><div id="mPeriods"></div></div>
-    <div class="panel"><h3>Síntomas más frecuentes</h3><p>Número de días en que registraste cada síntoma.</p><div id="mSym"></div></div>
-    <div class="panel"><h3>Estado de ánimo</h3><p>Número de días en que registraste cada estado.</p><div id="mMood"></div></div>
-    <div class="panel"><h3>Actividad sexual</h3><p>Días con actividad sexual registrada.</p><div id="mSex"></div></div>
+    <div class="panel" style="margin-top:0"><h3>Tu resumen</h3><ul class="facts" id="mFacts"></ul></div>
+    <div class="panel"><h3>Duración de tus ciclos</h3><p>Cuántos días pasan desde que empieza un periodo hasta el siguiente.</p><div id="mCycles"></div></div>
+    <div class="panel"><h3>Dolor en tus periodos</h3><p>El dolor promedio que registraste en cada periodo.</p><div id="mPain"></div></div>
+    <div class="panel"><h3>Tus síntomas más comunes</h3><p>Cuántos días registraste cada uno y cuándo suelen aparecer.</p><div id="mSym"></div></div>
+    <div class="panel"><h3>Tu estado de ánimo</h3><p>Cómo te has sentido más seguido y cuándo.</p><div id="mMood"></div></div>
+    <div class="panel"><h3>Actividad sexual y deseo</h3><p>Días con actividad sexual por mes.</p><div id="mSex"></div></div>
   </section>
 
   <!-- Ajustes -->
@@ -412,6 +448,8 @@ textarea{min-height:90px;resize:vertical}
   <div class="chips" data-group="moods"></div>
   <h3>Síntomas</h3>
   <div class="chips" data-group="symptoms"></div>
+  <h3>Nivel de dolor</h3>
+  <div class="chips" data-group="pain"></div>
   <h3><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.2 4.4 2.6.8-1.4 2.3-2.6 4.4-2.6 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"/></svg>Actividad sexual</h3>
   <div class="chips sex" data-group="sex"></div>
   <h3>Después de la actividad</h3>
@@ -440,14 +478,15 @@ const OPTIONS={
   symptoms:['Cólicos','Dolor de cabeza','Hinchazón','Senos sensibles','Acné','Dolor de espalda','Náuseas','Antojos','Insomnio','Flujo'],
   sex:['Con condón','Con pastillas','Sin protección','Oral','Masturbación','Con juguete','Otra'],
   sexSigns:['Dolor durante','Sangrado después','Ardor al orinar'],
-  libido:['Bajo','Medio','Alto']
+  libido:['Bajo','Medio','Alto'],
+  pain:[['1','Leve'],['2','Moderado'],['3','Fuerte'],['4','Muy fuerte']]
 };
 const PERIOD_FLOWS=['light','medium','heavy'];
 const ICONS={
   none:'🚫',spotting:'💧',light:'🩸',medium:'🩸🩸',heavy:'🩸🩸🩸',
   'Feliz':'😊','Tranquila':'😌','Con energía':'⚡','Sensible':'🥺','Irritable':'😤','Ansiosa':'😰','Triste':'😢','Cansada':'😴',
   'Cólicos':'🌀','Dolor de cabeza':'🤕','Hinchazón':'🎈','Senos sensibles':'💗','Acné':'🔴','Dolor de espalda':'🦴','Náuseas':'🤢','Antojos':'🍫','Insomnio':'🌙','Flujo':'💦',
-  'Dolor durante':'😖','Sangrado después':'🔻','Ardor al orinar':'🔥','Bajo':'😶','Medio':'🙂','Alto':'😍'
+  'Dolor durante':'😖','Sangrado después':'🔻','Ardor al orinar':'🔥','1':'😕','2':'😣','3':'😫','4':'😭','Bajo':'😶','Medio':'🙂','Alto':'😍'
 };
 
 // Fechas (siempre en hora local)
@@ -638,7 +677,7 @@ function renderCalendar(fc){
     let extra='';
     if(m.ov&&!isPeriod)extra+=OVI;
     if(data&&data.sex&&data.sex.length)extra+=HEART;
-    if(data&&((data.moods&&data.moods.length)||(data.symptoms&&data.symptoms.length)||(data.sexSigns&&data.sexSigns.length)||data.libido||(data.note&&data.note.trim())))extra+='<i class="dot"></i>';
+    if(data&&((data.moods&&data.moods.length)||(data.symptoms&&data.symptoms.length)||(data.sexSigns&&data.sexSigns.length)||data.libido||data.pain||(data.note&&data.note.trim())))extra+='<i class="dot"></i>';
     let bar='';
     if(m.phase){
       const pv=fc.map[k(add(date,-1))]||{},nx=fc.map[k(add(date,1))]||{};
@@ -654,22 +693,54 @@ function renderCalendar(fc){
   $('grid').innerHTML=html;
 }
 
+function rangeText(a,b){
+  if(diff(a,b)===0)return 'El '+a.getDate()+' de '+MONTHS[a.getMonth()];
+  return a.getMonth()===b.getMonth()?'Del '+a.getDate()+' al '+b.getDate()+' de '+MONTHS[a.getMonth()]:
+    'Del '+a.getDate()+' de '+MONTHS[a.getMonth()]+' al '+b.getDate()+' de '+MONTHS[b.getMonth()];
+}
+const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
 function renderCycles(st){
-  const n=st.recent.length;
-  $('stats').innerHTML=
-    '<div class="stat"><b>'+(n?st.cycle:'–')+'</b><span>días de ciclo promedio</span></div>'+
-    '<div class="stat"><b>'+st.period+'</b><span>días de periodo promedio</span></div>'+
-    '<div class="stat"><b>'+(st.sd!=null?'± '+Math.round(st.sd):'–')+'</b><span>días de variación</span></div>';
-  $('statsNote').textContent=n>=3?'Predicción basada en tus últimos '+n+' ciclos, con más peso a los recientes.':
-    n?'Llevas '+n+(n===1?' ciclo completo':' ciclos completos')+'. Con 3 o más la predicción será más precisa.':
-    'Aún no hay ciclos completos; se usan '+state.settings.cycle+' días por defecto.';
-  const ps=st.ps,list=$('history');
-  if(!ps.length){list.innerHTML='<li class="empty">Todavía no hay periodos registrados.</li>';return;}
+  const fc=forecast(st),t=today(),ps=st.ps,n=st.recent.length,now=$('cycleNow');
+  // Ahora mismo
+  if(!ps.length){
+    now.innerHTML='<h3>Ahora mismo</h3><p style="margin:0">Aún no hay periodos registrados. Marca el primer día de tu periodo en el calendario, o agrega periodos anteriores más abajo.</p>';
+  }else{
+    const last=ps[ps.length-1],total=Math.max(st.cycle,fc.cycleDay);
+    const pct=x=>Math.min(100,Math.max(0,x/total*100)).toFixed(1);
+    const ovN=st.cycle-13;
+    let h='<p class="now-day">Día '+fc.cycleDay+' de tu ciclo</p>';
+    h+='<div class="tl">'+
+      '<i style="left:'+pct(ovN-6)+'%;width:'+pct(7)+'%;background:var(--fertile-soft)"></i>'+
+      '<i style="left:0;width:'+pct(last.length)+'%;background:var(--period)"></i>'+
+      '<span class="mk" style="left:'+pct(fc.cycleDay-0.5)+'%"></span></div>';
+    h+='<div class="tl-labels"><span>Empezó el '+fmt(last.start)+'</span><span>'+(fc.late?fc.late+(fc.late===1?' día':' días')+' de retraso':'Próximo periodo: '+fmt(fc.next))+'</span></div>';
+    h+='<p class="friendly">'+(n?'Tu ciclo suele durar unos <b>'+st.cycle+' días</b> y tu periodo unos <b>'+st.period+'</b>.':'Tu periodo suele durar unos <b>'+st.period+' días</b>.')+'</p>';
+    h+='<p class="friendly" style="color:var(--muted);font-size:.9rem">'+(n>=3?'Las predicciones usan tus últimos '+n+' ciclos, así que son bastante confiables.':
+      n?'Llevas '+n+(n===1?' ciclo completo':' ciclos completos')+'. Con 3 o más, las predicciones serán más precisas.':
+      'Todavía no hay ciclos completos, así que uso '+state.settings.cycle+' días como referencia.')+'</p>';
+    now.innerHTML=h;
+  }
+  // Historial
+  const list=$('history');
+  if(!ps.length){list.innerHTML='<p class="empty">Todavía no hay periodos registrados.</p>';return;}
+  const SCALE=45;
   let html='';
   for(let i=ps.length-1;i>=0;i--){
-    const x=ps[i],next=ps[i+1];
-    const cyc=next?'Ciclo de '+diff(x.start,next.start)+' días':'Ciclo actual';
-    html+='<li><div><div class="when">'+fmtY(x.start)+'</div><div class="meta">'+x.length+(x.length===1?' día de periodo':' días de periodo')+'. '+cyc+'</div></div><button data-del="'+k(x.start)+'|'+k(x.end)+'">Eliminar</button></li>';
+    const x=ps[i],next=ps[i+1],current=!next;
+    const L=next?diff(x.start,next.start):Math.max(fc.cycleDay||x.length,x.length);
+    const odd=next&&(L<24||L>38);
+    const hasAuto=dayList(x.start,x.end).some(d=>(state.days[k(d)]||{}).auto);
+    const badge=current?'<span class="hbadge">Ciclo actual</span>':odd?'<span class="hbadge warn">'+(L<24?'Más corto':'Más largo')+' de lo habitual</span>':'';
+    const w=Math.min(100,L/SCALE*100),pw=Math.min(100,x.length/L*100);
+    let foot=current?(fc.late?'Lleva '+fc.cycleDay+' días; tu periodo tiene '+fc.late+(fc.late===1?' día':' días')+' de retraso.':'Lleva '+fc.cycleDay+(fc.cycleDay===1?' día':' días')+'; el próximo periodo llegaría alrededor del '+fmt(fc.next)+'.'):
+      'El ciclo duró <b>'+L+' días</b>.';
+    html+='<div class="hcard">'+
+      '<div class="hhead"><span class="hmonth">'+cap(MONTHS[x.start.getMonth()])+' '+x.start.getFullYear()+'</span>'+badge+'</div>'+
+      '<div class="hsub">'+rangeText(x.start,x.end)+', '+x.length+(x.length===1?' día':' días')+' de periodo'+(hasAuto?' (incluye días sin confirmar)':'')+'</div>'+
+      '<div class="hbar" style="width:'+w.toFixed(1)+'%'+(current?';opacity:.75':'')+'"><i style="width:'+pw.toFixed(1)+'%;background:var(--period)"></i></div>'+
+      '<div class="hfoot">'+foot+'</div>'+
+      '<div class="hact"><button data-go="'+k(x.start)+'">Ver en el calendario</button><button data-del="'+k(x.start)+'|'+k(x.end)+'">Eliminar</button></div>'+
+      '</div>';
   }
   list.innerHTML=html;
 }
@@ -721,9 +792,9 @@ function renderAll(){
 }
 
 // Hoja de registro diario
-function dayData(){return Object.assign({flow:'none',moods:[],symptoms:[],sex:[],sexSigns:[],libido:'',note:''},state.days[sel]||{});}
+function dayData(){return Object.assign({flow:'none',moods:[],symptoms:[],sex:[],sexSigns:[],libido:'',pain:'',note:''},state.days[sel]||{});}
 function isEmptyDay(d){
-  return (!d.flow||d.flow==='none')&&!(d.moods||[]).length&&!(d.symptoms||[]).length&&!(d.sex||[]).length&&!(d.sexSigns||[]).length&&!d.libido&&!(d.note||'').trim();
+  return (!d.flow||d.flow==='none')&&!(d.moods||[]).length&&!(d.symptoms||[]).length&&!(d.sex||[]).length&&!(d.sexSigns||[]).length&&!d.libido&&!d.pain&&!(d.note||'').trim();
 }
 function commit(d){
   const empty=isEmptyDay(d);
@@ -737,7 +808,7 @@ function renderSheet(){
     const g=box.dataset.group;
     box.innerHTML=OPTIONS[g].map(o=>{
       const val=Array.isArray(o)?o[0]:o,lab=Array.isArray(o)?o[1]:o;
-      const on=g==='flow'?(d.flow||'none')===val:g==='libido'?d.libido===val:(d[g]||[]).includes(val);
+      const on=g==='flow'?(d.flow||'none')===val:g==='libido'?d.libido===val:g==='pain'?d.pain===val:(d[g]||[]).includes(val);
       const ic=ICONS[val]?'<span class="ic" aria-hidden="true">'+ICONS[val]+'</span>':'';
       return '<button class="chip" data-val="'+val+'" aria-pressed="'+on+'">'+ic+lab+'</button>';
     }).join('');
@@ -765,6 +836,7 @@ document.querySelectorAll('.sheet .chips').forEach(box=>box.addEventListener('cl
     renderSheet();return;
   }
   else if(g==='libido')d.libido=d.libido===v?'':v;
+  else if(g==='pain')d.pain=d.pain===v?'':v;
   else{const a=d[g]||[];d[g]=a.includes(v)?a.filter(x=>x!==v):a.concat(v);}
   commit(d);renderSheet();
 }));
@@ -921,7 +993,7 @@ $('exportXlsx').addEventListener('click',async()=>{
     const nx=st.ps[i+1];
     cyc.push([fmtD(p0.start),fmtD(p0.end),p0.length,nx?diff(p0.start,nx.start):'En curso']);
   });
-  const head=['Fecha','Día del ciclo','Fase estimada','Flujo','Estado de ánimo','Síntomas'];
+  const head=['Fecha','Día del ciclo','Fase estimada','Flujo','Estado de ánimo','Síntomas','Nivel de dolor'];
   if(inc)head.push('Actividad sexual','Después de la actividad','Deseo sexual');
   head.push('Nota');
   const daily=[head];
@@ -929,11 +1001,12 @@ $('exportXlsx').addEventListener('click',async()=>{
     const d=p(key);if(!inRange(d))return;
     const x=state.days[key];
     const flow=(FL[x.flow]||'')+(x.auto&&FL[x.flow]?' (sin confirmar)':''),moods=(x.moods||[]).join(', '),sym=(x.symptoms||[]).join(', '),sex=inc?(x.sex||[]).join(', '):'',signs=inc?(x.sexSigns||[]).join(', '):'',lib=inc?(x.libido||''):'',note=(x.note||'').trim();
-    if(!flow&&!moods&&!sym&&!sex&&!signs&&!lib&&!note)return;
+    const pain=PAIN_LBL[x.pain]||'';
+    if(!flow&&!moods&&!sym&&!pain&&!sex&&!signs&&!lib&&!note)return;
     let cd='';
     for(let i=st.ps.length-1;i>=0;i--){const n=diff(st.ps[i].start,d);if(n>=0){if(n<60)cd=n+1;break;}}
     const m=fc.map[key]||{};
-    const row=[fmtD(d),cd,m.phase?PHASES[m.phase][0]:'',flow,moods,sym];
+    const row=[fmtD(d),cd,m.phase?PHASES[m.phase][0]:'',flow,moods,sym,pain];
     if(inc)row.push(sex,signs,lib);
     row.push(note);
     daily.push(row);
@@ -1002,6 +1075,25 @@ function phaseStack(byPh,counts){
   if(notes.length)html+='<ul class="insights">'+notes.map(n=>'<li>'+n+'</li>').join('')+'</ul>';
   return html;
 }
+const PH_PILL={menstrual:'Sobre todo durante el periodo',folicular:'Sobre todo en los días después del periodo',ovulatoria:'Sobre todo alrededor de la ovulación',lutea:'Sobre todo en los días antes del periodo'};
+const PH_TXT={menstrual:'durante tu periodo',folicular:'en los días después de tu periodo',ovulatoria:'alrededor de tu ovulación',lutea:'en los días antes de tu periodo'};
+const PAIN_LBL={'1':'Leve','2':'Moderado','3':'Fuerte','4':'Muy fuerte'};
+const painWord=a=>a<1.5?'leve':a<2.5?'moderado':a<3.5?'fuerte':'muy fuerte';
+function topPhase(o){
+  if(!o)return null;
+  const tot=PH_ORDER.reduce((a,ph)=>a+(o[ph]||0),0);if(tot<2)return null;
+  const top=PH_ORDER.slice().sort((a,b)=>(o[b]||0)-(o[a]||0))[0];
+  return (o[top]||0)/tot>=0.5?top:'mixed';
+}
+function rankList(counts,byPh){
+  const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(!arr.length)return EMPTY;
+  return arr.map(([l,c])=>{
+    const tp=topPhase(byPh[l]);
+    const line=tp==='mixed'?'<span class="rp">En distintos momentos del ciclo</span>':tp?'<span class="rp"><i style="background:'+PHASES[tp][2]+'"></i>'+PH_PILL[tp]+'</span>':'';
+    return '<div class="rank"><span class="rn">'+(ICONS[l]?ICONS[l]+' ':'')+esc(l)+'</span><span class="rc">'+c+(c===1?' día':' días')+'</span>'+line+'</div>';
+  }).join('');
+}
 function renderMetrics(st,fc){
   const t=today(),from=mRange==='all'?null:new Date(t.getFullYear(),t.getMonth()-(+mRange),t.getDate());
   const inR=d=>(!from||diff(from,d)>=0)&&diff(d,t)>=0;
@@ -1010,9 +1102,11 @@ function renderMetrics(st,fc){
     const a=st.ps[i],L=diff(a.start,st.ps[i+1].start);
     if(inR(a.start)&&L>=15&&L<=60)cyc.push({start:a.start,L});
   }
-  const pers=st.ps.filter((x,i)=>inR(x.start)&&!(i===st.ps.length-1&&diff(x.end,t)<=1));
-  const sym={},mood={},sexCat={},symPh={},moodPh={},sexPh={},sexMonth={};
-  let logged=0,sexDays=0;
+  const last=st.ps[st.ps.length-1];
+  const ongoing=last&&diff(last.end,t)<=1;
+  const pers=st.ps.filter(x=>inR(x.start)&&!(x===last&&ongoing));
+  const sym={},mood={},sexCat={},symPh={},moodPh={},sexMonth={};
+  let logged=0,sexDays=0,painSum=0,painN=0;
   const bump=(o,key)=>{o[key]=(o[key]||0)+1;};
   const bumpPh=(o,key,ph)=>{if(!ph)return;o[key]=o[key]||{};bump(o[key],ph);};
   Object.keys(state.days).forEach(key=>{
@@ -1020,41 +1114,66 @@ function renderMetrics(st,fc){
     const x=state.days[key],ph=(fc.map[key]||{}).phase;logged++;
     (x.symptoms||[]).forEach(v=>{bump(sym,v);bumpPh(symPh,v,ph);});
     (x.moods||[]).forEach(v=>{bump(mood,v);bumpPh(moodPh,v,ph);});
-    if((x.sex||[]).length){
-      sexDays++;bump(sexMonth,key.slice(0,7));if(ph)bump(sexPh,ph);
-      x.sex.forEach(v=>bump(sexCat,v));
-    }
+    if(x.pain&&PERIOD_FLOWS.includes(x.flow)){painSum+=+x.pain;painN++;}
+    if((x.sex||[]).length){sexDays++;bump(sexMonth,key.slice(0,7));x.sex.forEach(v=>bump(sexCat,v));}
   });
-  const Ls=cyc.map(c=>c.L);
-  $('mStats').innerHTML=
-    '<div class="stat"><b>'+cyc.length+'</b><span>ciclos completos</span></div>'+
-    '<div class="stat"><b>'+(Ls.length?Math.min.apply(null,Ls)+'–'+Math.max.apply(null,Ls):'–')+'</b><span>ciclo más corto y más largo (días)</span></div>'+
-    '<div class="stat"><b>'+logged+'</b><span>días con registros</span></div>';
-  const recent=cyc.slice(-12);
-  $('mCycles').innerHTML=recent.length?barChart(recent.map(c=>c.L),recent.map(c=>MS[c.start.getMonth()]),'var(--lut)',{avg:Ls.reduce((a,b)=>a+b,0)/Ls.length,label:'Duración de tus ciclos'})+
-    (Ls.length>=2?'<p class="note-small" style="margin:8px 0 0">Tus ciclos variaron '+(Math.max.apply(null,Ls)-Math.min.apply(null,Ls))+' días entre el más corto y el más largo.</p>':''):
-    '<p class="empty">Necesitas al menos dos periodos registrados para ver la duración de tus ciclos.</p>';
-  const rp=pers.slice(-12);
-  $('mPeriods').innerHTML=rp.length?barChart(rp.map(x=>x.length),rp.map(x=>MS[x.start.getMonth()]),'var(--period)',{avg:rp.reduce((a,x)=>a+x.length,0)/rp.length,label:'Duración de tu periodo'}):EMPTY;
-  $('mSym').innerHTML=Object.keys(sym).length?hbars(sym,'var(--period)')+phaseStack(symPh,sym):EMPTY;
-  $('mMood').innerHTML=Object.keys(mood).length?hbars(mood,'var(--fol)')+phaseStack(moodPh,mood):EMPTY;
-  const lib=libidoByPhase(fc,inR);
-  if(!sexDays&&!lib){$('mSex').innerHTML=EMPTY;}
-  else if(!sexDays){$('mSex').innerHTML=lib;}
-  else{
+  // Resumen en palabras
+  const F=[],Ls=cyc.map(c=>c.L);
+  if(Ls.length){
+    const avg=Math.round(Ls.reduce((a,b)=>a+b,0)/Ls.length);
+    F.push(['🔄','Tu ciclo dura en promedio <b>'+avg+' días</b>'+(Ls.length>=2?', entre '+Math.min.apply(null,Ls)+' y '+Math.max.apply(null,Ls)+' días.':'.')]);
+  }else F.push(['🔄','Registra al menos dos periodos para conocer cuánto dura tu ciclo.']);
+  if(pers.length){
+    const ap=Math.round(pers.reduce((a,x)=>a+x.length,0)/pers.length);
+    F.push(['🩸','Tu periodo dura en promedio <b>'+ap+' días</b>.']);
+  }
+  if(Ls.length>=3){
+    const r=Math.max.apply(null,Ls)-Math.min.apply(null,Ls);
+    F.push(['📏',r<=7?'Tus ciclos son <b>regulares</b>: varían solo '+r+' días entre sí.':r<=9?'Tus ciclos varían '+r+' días entre sí, <b>dentro de lo habitual</b>.':'Tus ciclos varían '+r+' días entre sí, <b>más de lo habitual</b>. Vale la pena comentarlo con tu ginecóloga.']);
+  }
+  if(painN)F.push(['😣','Durante tu periodo, tu dolor suele ser <b>'+painWord(painSum/painN)+'</b>.']);
+  const topS=Object.entries(sym).sort((a,b)=>b[1]-a[1])[0];
+  if(topS){const tp=topPhase(symPh[topS[0]]);F.push([ICONS[topS[0]]||'🌀','Tu síntoma más común es <b>'+esc(topS[0].toLowerCase())+'</b>'+(tp&&tp!=='mixed'?', sobre todo '+PH_TXT[tp]+'.':'.')]);}
+  const topM=Object.entries(mood).sort((a,b)=>b[1]-a[1])[0];
+  if(topM)F.push([ICONS[topM[0]]||'😊','Te has sentido <b>'+esc(topM[0].toLowerCase())+'</b> más seguido que de otra forma.']);
+  F.push(['📝','Tienes <b>'+logged+'</b>'+(logged===1?' día registrado':' días registrados')+' en el tiempo elegido.']);
+  $('mFacts').innerHTML=F.map(f=>'<li><span class="fi" aria-hidden="true">'+f[0]+'</span><span>'+f[1]+'</span></li>').join('');
+  // Duración de ciclos
+  const rc=cyc.slice(-12);
+  $('mCycles').innerHTML=rc.length?barChart(rc.map(c=>c.L),rc.map(c=>MS[c.start.getMonth()]),'var(--lut)',{avg:Ls.reduce((a,b)=>a+b,0)/Ls.length,label:'Duración de tus ciclos'})+
+    '<p class="cap">Cada barra es un ciclo, nombrado por el mes en que empezó. La línea punteada es tu promedio: si las barras están cerca de ella, tus ciclos son parejos.</p>':
+    '<p class="empty">Necesitas al menos dos periodos registrados para ver esta gráfica.</p>';
+  // Dolor por periodo
+  const pp=st.ps.filter(x=>inR(x.start)).map(x=>{
+    const v=dayList(x.start,x.end).map(d=>+(state.days[k(d)]||{}).pain||0).filter(Boolean);
+    return v.length?{start:x.start,avg:Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10}:null;
+  }).filter(Boolean).slice(-12);
+  $('mPain').innerHTML=pp.length?barChart(pp.map(x=>x.avg),pp.map(x=>MS[x.start.getMonth()]),'var(--period)',{label:'Dolor en tus periodos'})+
+    '<p class="cap">Cada barra es un periodo. 1 es dolor leve, 2 moderado, 3 fuerte y 4 muy fuerte.</p>':
+    '<p class="empty">Registra tu nivel de dolor durante tu periodo para ver esta gráfica.</p>';
+  // Síntomas y ánimo
+  $('mSym').innerHTML=rankList(sym,symPh);
+  $('mMood').innerHTML=rankList(mood,moodPh);
+  // Actividad sexual y deseo
+  const lr=libAverages(fc,inR),phs=Object.keys(lr.avg);
+  let libTxt='';
+  if(lr.n>=4&&phs.length>=2){
+    phs.sort((a,b)=>lr.avg[b]-lr.avg[a]);
+    const hi=phs[0],lo=phs[phs.length-1];
+    libTxt=lr.avg[hi]-lr.avg[lo]>=0.5?'Tu deseo suele ser más alto '+PH_TXT[hi]+' y más bajo '+PH_TXT[lo]+'.':'Tu deseo se mantiene parecido a lo largo del ciclo.';
+  }else if(lr.n)libTxt='Sigue registrando tu deseo sexual; con algunos días más podré mostrarte cómo cambia durante tu ciclo.';
+  if(!sexDays&&!libTxt){$('mSex').innerHTML=EMPTY;return;}
+  let html='';
+  if(sexDays){
     const nM=mRange==='all'?12:+mRange,vals=[],labs=[];
     for(let i=nM-1;i>=0;i--){const m=new Date(t.getFullYear(),t.getMonth()-i,1);vals.push(sexMonth[m.getFullYear()+'-'+pad(m.getMonth()+1)]||0);labs.push(MS[m.getMonth()]);}
-    let html=barChart(vals,labs,'var(--heart)',{label:'Actividad sexual por mes'});
-    html+='<div class="sub-h">Por tipo</div>'+hbars(sexCat,'var(--heart)');
-    const totPh=PH_ORDER.reduce((a,ph)=>a+(sexPh[ph]||0),0);
-    if(totPh){
-      html+='<div class="sub-h">Por fase del ciclo</div><div class="hb"><span class="hl">Todos los días</span><span class="ht stack">'+
-        PH_ORDER.filter(ph=>sexPh[ph]).map(ph=>'<i style="width:'+(sexPh[ph]/totPh*100).toFixed(1)+'%;background:'+PHASES[ph][2]+'" title="'+PHASES[ph][0]+': '+sexPh[ph]+'"></i>').join('')+
-        '</span><span class="hc">'+totPh+'</span></div>'+phaseLegend();
-    }
-    $('mSex').innerHTML=html+lib;
+    html+=barChart(vals,labs,'var(--heart)',{label:'Actividad sexual por mes'});
+    html+='<div class="sub-h">Por tipo</div>'+rankList(sexCat,{});
   }
+  if(libTxt)html+='<div class="sub-h">Tu deseo sexual</div><p style="margin:4px 0 0;color:var(--ink);font-size:.95rem">💗 '+libTxt+'</p>';
+  $('mSex').innerHTML=html;
 }
+
 $('metricRange').addEventListener('click',e=>{
   const b=e.target.closest('[data-mrange]');if(!b)return;
   mRange=b.dataset.mrange;
@@ -1129,6 +1248,12 @@ function computeAlerts(st,fc){
     const d=p(key);return state.days[key].flow==='spotting'&&diff(d,t)>=0&&diff(d,t)<=90&&!near(d);
   }).sort();
   if(spots.length)A.push(['','🔸','Registraste manchado fuera de tu periodo'+(spots.length>1?' en '+spots.length+' días':' el '+fmt(p(spots[0])))+'. Con pastillas anticonceptivas es común, sobre todo en los primeros meses o si olvidaste alguna. Si se repite, aparece después de las relaciones o viene con dolor, consúltalo.']);
+  // Dolor
+  const painKeys=Object.keys(state.days).filter(key=>{const d=p(key);return diff(d,t)>=0&&diff(d,t)<=60;}).sort();
+  const vs=painKeys.filter(key=>state.days[key].pain==='4');
+  const strong=painKeys.filter(key=>+state.days[key].pain>=3);
+  if(vs.length)A.push(['warn','😭','Registraste dolor muy fuerte '+(vs.length>1?vs.length+' días en los últimos 2 meses':'el '+fmt(p(vs[vs.length-1])))+'. Si el dolor no mejora con analgésicos o te impide hacer tus actividades, no es algo que debas aguantar: consúltalo con tu ginecóloga.']);
+  else if(strong.length>=3)A.push(['','😫','Registraste dolor fuerte '+strong.length+' días en los últimos 2 meses. Si es más intenso de lo que acostumbras o no mejora con analgésicos, coméntalo con tu ginecóloga.']);
   return A;
 }
 function renderInsights(st,fc){
@@ -1266,6 +1391,16 @@ function clearAutoAfter(key){
   }
   return removed;
 }
+
+// Ciclos: navegación y selector de días
+$('history').addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]');if(!b)return;
+  const d=p(b.dataset.go);view=new Date(d.getFullYear(),d.getMonth(),1);
+  showView('v-cal');renderAll();
+});
+const stepLen=n=>{const v=Math.min(12,Math.max(1,(parseInt($('pLen').value,10)||5)+n));$('pLen').value=v;};
+$('pMinus').addEventListener('click',()=>stepLen(-1));
+$('pPlus').addEventListener('click',()=>stepLen(1));
 
 $('themeChips').addEventListener('click',e=>{
   const b=e.target.closest('[data-theme-val]');if(!b)return;
