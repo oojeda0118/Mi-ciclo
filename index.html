@@ -370,13 +370,99 @@ body::before{display:none}
 .tabs .fab{flex:none;width:58px;height:58px;border-radius:50%;background:var(--ink);color:var(--bg);border:4px solid var(--surface);margin:-26px 6px 0;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(20,10,30,.28)}
 .tabs .fab svg{width:26px;height:26px}
 .sheet{border-radius:28px 28px 0 0}
+
+/* Tarjetas blancas en la pantalla de inicio */
+:root{--tc-per:#E0457E;--tc-ovu:#14996A;--tc-fer:#1E9F86;--tc-cyc:#8455E3}
+.tile{background:var(--surface)!important;box-shadow:var(--shadow)}
+.t-period .tv,.t-period .tl2{color:var(--tc-per)}
+.t-ovu .tv,.t-ovu .tl2{color:var(--tc-ovu)}
+.t-fert .tv,.t-fert .tl2{color:var(--tc-fer)}
+.t-cyc .tv,.t-cyc .tl2{color:var(--tc-cyc)}
+.t-period.warn{box-shadow:inset 0 0 0 2px var(--tc-per),var(--shadow)}
+/* Tarjetas de estadísticas */
+.scard{border-radius:26px;padding:18px 16px 16px;margin-top:14px;background:var(--sc-bg);border:1px solid var(--card-border);box-shadow:var(--shadow)}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px}
+.sc-label{font-size:.85rem;color:var(--sc-acc);font-weight:500}
+.sc-title{font-family:var(--serif);font-size:1.55rem;line-height:1.15;color:var(--sc-acc);margin-top:2px}
+.sc-big{text-align:right;flex:none}
+.sc-bigv{font-family:var(--serif);font-size:2.1rem;line-height:1;color:var(--sc-acc)}
+.sc-bigc{font-size:.8rem;color:var(--sc-acc);opacity:.85;margin-top:4px;max-width:9.5em;margin-left:auto}
+.bchart{margin:8px 0 4px}
+.bplot{position:relative;height:140px;display:grid;gap:8px}
+.bcol{position:relative;height:100%}
+.sbar{position:absolute;left:50%;bottom:0;width:min(24px,72%);transform:translateX(-50%);border-radius:10px 10px 0 0;background:var(--sc-acc);opacity:.42}
+.sbar.hi{opacity:1}
+.bplot::after{content:"";position:absolute;left:-4px;right:-4px;bottom:0;height:1.5px;border-radius:1px;background:var(--sc-acc);opacity:.35}
+.bval{position:absolute;left:-4px;right:-4px;text-align:center;font-size:.75rem;line-height:1;color:var(--sc-acc);font-weight:600}
+.bavg{position:absolute;left:-4px;right:-4px;border-top:3px solid var(--sc-line);pointer-events:none}
+.bavg span{position:absolute;left:0;bottom:4px;box-shadow:0 1px 4px rgba(0,0,0,.08);background:var(--sc-pill,var(--sc-line));color:var(--sc-pill-ink,var(--sc-acc));font-size:.72rem;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.blabels{display:grid;gap:8px;margin-top:8px;text-align:center;font-size:.72rem;color:var(--sc-acc)}
+.blabels .em{display:block;font-size:1.25rem;line-height:1.2}
+.blabels .lv{display:block;font-size:.95rem;font-weight:700;line-height:1.3}
+.blabels small{display:block;font-size:.66rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.9}
+.sc-ins{background:var(--surface);border-radius:18px;padding:4px 12px;margin-top:16px}
+.sc-in{display:flex;gap:10px;padding:10px 0;font-size:.9rem;border-bottom:1px solid var(--line)}
+.sc-in:last-child{border-bottom:none}
+.sc-ii{flex:none}
+.sc-more{background:var(--surface);border-radius:18px;padding:0 12px;margin-top:10px}
+.sc-more summary{cursor:pointer;font-weight:600;font-size:.9rem;padding:12px 0;color:var(--sc-acc);list-style:none;display:flex;justify-content:space-between;align-items:center}
+.sc-more summary::-webkit-details-marker{display:none}
+.sc-more summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s}
+.sc-more[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.sc-empty{color:var(--sc-acc);font-size:.92rem;margin:0}
+.sc-cyc{--sc-bg:linear-gradient(165deg,#E9DAFF 0%,#F8F2FF 100%);--sc-acc:#7443D2;--sc-line:rgba(255,255,255,.95)}
+.sc-pain{--sc-bg:linear-gradient(165deg,#FFD4E3 0%,#FFF1F6 100%);--sc-acc:#CF336D;--sc-line:rgba(255,255,255,.95)}
+.sc-sym{--sc-bg:linear-gradient(165deg,#FFDFC9 0%,#FFF4EC 100%);--sc-acc:#B9561A;--sc-line:rgba(255,255,255,.95)}
+.sc-mood{--sc-bg:linear-gradient(165deg,#D0F0E3 0%,#EFFAF5 100%);--sc-acc:#137F58;--sc-line:rgba(255,255,255,.95)}
+.sc-sex{--sc-bg:linear-gradient(165deg,#F5D4F1 0%,#FDF0FB 100%);--sc-acc:#A82B93;--sc-line:rgba(255,255,255,.95)}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]){--sc-pill:rgba(255,255,255,.92);--sc-pill-ink:#2A2030;--tc-per:#FF85B1;--tc-ovu:#57D9A6;--tc-fer:#72E2C6;--tc-cyc:#C7A6FF}
+:root:not([data-theme="light"]) .sc-cyc{--sc-bg:linear-gradient(165deg,rgba(150,100,255,.30),rgba(150,100,255,.10));--sc-acc:#CBAEFF;--sc-line:rgba(255,255,255,.45)}
+:root:not([data-theme="light"]) .sc-pain{--sc-bg:linear-gradient(165deg,rgba(255,90,150,.28),rgba(255,90,150,.09));--sc-acc:#FF92BA;--sc-line:rgba(255,255,255,.45)}
+:root:not([data-theme="light"]) .sc-sym{--sc-bg:linear-gradient(165deg,rgba(255,150,90,.26),rgba(255,150,90,.08));--sc-acc:#FFB585;--sc-line:rgba(255,255,255,.45)}
+:root:not([data-theme="light"]) .sc-mood{--sc-bg:linear-gradient(165deg,rgba(50,200,140,.24),rgba(50,200,140,.08));--sc-acc:#72E0B5;--sc-line:rgba(255,255,255,.45)}
+:root:not([data-theme="light"]) .sc-sex{--sc-bg:linear-gradient(165deg,rgba(230,90,210,.26),rgba(230,90,210,.08));--sc-acc:#F2A0E8;--sc-line:rgba(255,255,255,.45)}
+}
+:root[data-theme="dark"]{--sc-pill:rgba(255,255,255,.92);--sc-pill-ink:#2A2030;--tc-per:#FF85B1;--tc-ovu:#57D9A6;--tc-fer:#72E2C6;--tc-cyc:#C7A6FF}
+:root[data-theme="dark"] .sc-cyc{--sc-bg:linear-gradient(165deg,rgba(150,100,255,.30),rgba(150,100,255,.10));--sc-acc:#CBAEFF;--sc-line:rgba(255,255,255,.45)}
+:root[data-theme="dark"] .sc-pain{--sc-bg:linear-gradient(165deg,rgba(255,90,150,.28),rgba(255,90,150,.09));--sc-acc:#FF92BA;--sc-line:rgba(255,255,255,.45)}
+:root[data-theme="dark"] .sc-sym{--sc-bg:linear-gradient(165deg,rgba(255,150,90,.26),rgba(255,150,90,.08));--sc-acc:#FFB585;--sc-line:rgba(255,255,255,.45)}
+:root[data-theme="dark"] .sc-mood{--sc-bg:linear-gradient(165deg,rgba(50,200,140,.24),rgba(50,200,140,.08));--sc-acc:#72E0B5;--sc-line:rgba(255,255,255,.45)}
+:root[data-theme="dark"] .sc-sex{--sc-bg:linear-gradient(165deg,rgba(230,90,210,.26),rgba(230,90,210,.08));--sc-acc:#F2A0E8;--sc-line:rgba(255,255,255,.45)}
+
+/* Personalizar inicio */
+.top-actions{display:flex;gap:10px}
+.edit-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border-radius:22px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--card-border)}
+.edit-bar p{margin:2px 0 0;font-size:.85rem;color:var(--muted)}
+.edit-actions{display:flex;flex-direction:column;gap:6px;flex:none}
+.edit-actions .primary{margin-top:0;padding:9px 20px}
+.edit-actions .ghost{padding:6px 12px;font-size:.8rem}
+.hhandle{display:none}
+.editing-home .hblock{background:var(--surface);border:1px solid var(--card-border);box-shadow:var(--shadow);border-radius:18px;margin-bottom:10px;position:relative}
+.editing-home .hblock>:not(.hhandle){display:none!important}
+.editing-home .hhandle{display:flex;align-items:center;gap:14px;padding:18px 16px;font-weight:600;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.editing-home #backupBanner{display:none!important}
+.editing-home .hblock.empty{display:none}
+.editing-home #editHome{background:var(--ink);color:var(--surface)}
+.grip{font-size:1.4rem;color:var(--muted);line-height:1}
+.hblock.dragging{z-index:5;box-shadow:0 14px 34px rgba(30,10,40,.22)}
+.hblock.dragging .hhandle{cursor:grabbing}
+/* Qué esperar plegable */
+.info-card details.ifold{margin-top:0;border-top:none;padding-top:0}
+.ifold>summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer}
+.ifold>summary::-webkit-details-marker{display:none}
+.ifold>summary h3{margin:0;flex:1}
+.ifold>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s;flex:none}
+.ifold[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.ifold[open]>summary{margin-bottom:8px}
+.ibadge{background:var(--period-soft);color:var(--tc-per);font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:999px;flex:none}
 </style>
 </head>
 <body>
 <main>
   <div class="top">
     <div><h1>Mi ciclo</h1><div class="date-s" id="todayLabel"></div></div>
-    <button class="icon-btn" id="goToday" aria-label="Ir a hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+    <div class="top-actions"><button class="icon-btn" id="editHome" aria-label="Personalizar inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button></div>
   </div>
 
   <!-- Calendario -->
@@ -470,11 +556,11 @@ body::before{display:none}
       <button class="chip" data-mrange="all" aria-pressed="false">Todo</button>
     </div>
     <div class="panel" style="margin-top:0"><h3>Tu resumen</h3><ul class="facts" id="mFacts"></ul></div>
-    <div class="panel"><h3>Duración de tus ciclos</h3><p>Cuántos días pasan desde que empieza un periodo hasta el siguiente, comparado con tu promedio.</p><div id="mCycles"></div></div>
-    <div class="panel"><h3>Dolor en tus periodos</h3><p>Cómo fue el dolor en cada uno de tus periodos.</p><div id="mPain"></div></div>
-    <div class="panel"><h3>Tus síntomas más comunes</h3><p>Cuántos días registraste cada uno y cuándo suelen aparecer.</p><div id="mSym"></div></div>
-    <div class="panel"><h3>Tu estado de ánimo</h3><p>Cómo te has sentido más seguido y cuándo.</p><div id="mMood"></div></div>
-    <div class="panel"><h3>Actividad sexual y deseo</h3><p>Días con actividad sexual por mes.</p><div id="mSex"></div></div>
+    <div id="mCycles"></div>
+    <div id="mPain"></div>
+    <div id="mSym"></div>
+    <div id="mMood"></div>
+    <div id="mSex"></div>
   </section>
 
   <!-- Ajustes -->
@@ -974,7 +1060,6 @@ $('dow').innerHTML=DOWS.map(x=>'<span class="dow">'+x+'</span>').join('');
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-key]');if(b)openSheet(b.dataset.key);});
 $('prevM').addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);renderAll();});
 $('nextM').addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);renderAll();});
-$('goToday').addEventListener('click',()=>{const t=today();view=new Date(t.getFullYear(),t.getMonth(),1);showView('v-cal');renderAll();});
 function heroAct(e){
   const b=e.target.closest('[data-act]');if(!b)return;
   if(b.dataset.act==='today'){
@@ -989,6 +1074,7 @@ $('fabAdd').addEventListener('click',()=>openSheet(k(today())));
 
 // Pestañas
 function showView(id){
+  if(id!=='v-cal'&&document.body.classList.contains('editing-home'))setEditHome(false);
   ['v-cal','v-cycles','v-metrics','v-settings'].forEach(v=>$(v).hidden=v!==id);
   document.querySelectorAll('.tabs button[data-view]').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===id));
   window.scrollTo(0,0);
@@ -1216,9 +1302,31 @@ function rankList(counts,byPh){
     return '<div class="rank"><span class="rn">'+(ICONS[l]?ICONS[l]+' ':'')+esc(l)+'</span><span class="rc">'+c+(c===1?' día':' días')+'</span>'+line+'</div>';
   }).join('');
 }
+function statCard(o){
+  let h='<div class="scard '+o.cls+'"><div class="sc-head"><div><div class="sc-label">'+o.label+'</div><div class="sc-title">'+o.title+'</div></div>';
+  if(o.big!=null)h+='<div class="sc-big"><div class="sc-bigv">'+o.big+'</div><div class="sc-bigc">'+(o.bigCap||'')+'</div></div>';
+  h+='</div>'+(o.body||'');
+  if(o.ins&&o.ins.length)h+='<div class="sc-ins">'+o.ins.map(x=>'<div class="sc-in"><span class="sc-ii" aria-hidden="true">'+x[0]+'</span><span>'+x[1]+'</span></div>').join('')+'</div>';
+  return h+(o.foot||'')+'</div>';
+}
+function bars(vals,labels,o){
+  o=o||{};
+  const n=vals.length,mn=o.min||0,max=mn+((o.max||Math.max.apply(null,vals.concat([o.avg||0,1])))-mn)*1.12;
+  const pc=v=>Math.max(4,(v-mn)/(max-mn)*100);
+  const hi=o.hi==null?n-1:o.hi,cols='grid-template-columns:repeat('+n+',1fr)';
+  let h='<div class="bchart"><div class="bplot" style="'+cols+'">';
+  vals.forEach((v,i)=>{
+    h+='<div class="bcol"><div class="sbar'+(i===hi?' hi':'')+'" style="height:'+pc(v).toFixed(1)+'%"></div></div>';
+  });
+  if(o.avg!=null)h+='<div class="bavg" style="bottom:'+pc(o.avg).toFixed(1)+'%"><span>'+o.avgLabel+'</span></div>';
+  return h+'</div><div class="blabels" style="'+cols+'">'+labels.map(l=>'<span>'+l+'</span>').join('')+'</div></div>';
+}
+const emLabel=l=>'<b class="em">'+(ICONS[l]||'•')+'</b><small>'+esc(l)+'</small>';
+const r1=x=>Math.round(x*10)/10;
 function renderMetrics(st,fc){
   const t=today(),from=mRange==='all'?null:new Date(t.getFullYear(),t.getMonth()-(+mRange),t.getDate());
   const inR=d=>(!from||diff(from,d)>=0)&&diff(d,t)>=0;
+  const rangeLabel=mRange==='all'?'Todo tu historial':'Últimos '+mRange+' meses';
   const cyc=[];
   for(let i=0;i<st.ps.length-1;i++){
     const a=st.ps[i],L=diff(a.start,st.ps[i+1].start);
@@ -1245,14 +1353,7 @@ function renderMetrics(st,fc){
     const avg=Math.round(Ls.reduce((a,b)=>a+b,0)/Ls.length);
     F.push(['🔄','Tu ciclo dura en promedio <b>'+avg+' días</b>'+(Ls.length>=2?', entre '+Math.min.apply(null,Ls)+' y '+Math.max.apply(null,Ls)+' días.':'.')]);
   }else F.push(['🔄','Registra al menos dos periodos para conocer cuánto dura tu ciclo.']);
-  if(pers.length){
-    const ap=Math.round(pers.reduce((a,x)=>a+x.length,0)/pers.length);
-    F.push(['🩸','Tu periodo dura en promedio <b>'+ap+' días</b>.']);
-  }
-  if(Ls.length>=3){
-    const r=Math.max.apply(null,Ls)-Math.min.apply(null,Ls);
-    F.push(['📏',r<=7?'Tus ciclos son <b>regulares</b>: varían solo '+r+' días entre sí.':r<=9?'Tus ciclos varían '+r+' días entre sí, <b>dentro de lo habitual</b>.':'Tus ciclos varían '+r+' días entre sí, <b>más de lo habitual</b>. Vale la pena comentarlo con tu ginecóloga.']);
-  }
+  if(pers.length)F.push(['🩸','Tu periodo dura en promedio <b>'+Math.round(pers.reduce((a,x)=>a+x.length,0)/pers.length)+' días</b>.']);
   if(painN)F.push(['😣','Durante tu periodo, tu dolor suele ser <b>'+painWord(painSum/painN)+'</b>.']);
   const topS=Object.entries(sym).sort((a,b)=>b[1]-a[1])[0];
   if(topS){const tp=topPhase(symPh[topS[0]]);F.push([ICONS[topS[0]]||'🌀','Tu síntoma más común es <b>'+esc(topS[0].toLowerCase())+'</b>'+(tp&&tp!=='mixed'?', sobre todo '+PH_TXT[tp]+'.':'.')]);}
@@ -1260,74 +1361,105 @@ function renderMetrics(st,fc){
   if(topM)F.push([ICONS[topM[0]]||'😊','Te has sentido <b>'+esc(topM[0].toLowerCase())+'</b> más seguido que de otra forma.']);
   F.push(['📝','Tienes <b>'+logged+'</b>'+(logged===1?' día registrado':' días registrados')+' en el tiempo elegido.']);
   $('mFacts').innerHTML=F.map(f=>'<li><span class="fi" aria-hidden="true">'+f[0]+'</span><span>'+f[1]+'</span></li>').join('');
-  // Duración de ciclos, como lista
+
+  // 1. Duración de los ciclos
   if(!cyc.length){
-    $('mCycles').innerHTML='<p class="empty">Necesitas al menos dos periodos registrados para ver esto.</p>';
+    $('mCycles').innerHTML=statCard({cls:'sc-cyc',label:rangeLabel,title:'Duración de tus ciclos',body:'<p class="sc-empty">Necesitas al menos dos periodos registrados para ver esto.</p>'});
   }else{
-    const avgL=Ls.reduce((a,b)=>a+b,0)/Ls.length,ra=Math.round(avgL);
-    let tr='';
+    const avgL=Ls.reduce((a,b)=>a+b,0)/Ls.length,ra=Math.round(avgL),rc=cyc.slice(-8);
+    const ins=[],odd=Ls.filter(L=>L<24||L>38).length;
+    ins.push(odd?['⚠️',odd+(odd===1?' de tus ciclos estuvo':' de tus ciclos estuvieron')+' fuera del rango habitual en adultas (24 a 38 días). Si se repite, coméntalo con tu ginecóloga.']
+      :['✅','Tus ciclos están dentro del rango habitual en adultas (24 a 38 días).']);
+    if(Ls.length>=2){
+      const r=Math.max.apply(null,Ls)-Math.min.apply(null,Ls);
+      ins.push(['📏',r<=7?'Son regulares: varían solo '+r+(r===1?' día':' días')+' entre sí.':r<=9?'Varían '+r+' días entre sí, dentro de lo habitual.':'Varían '+r+' días entre sí, más de lo habitual (más de 7 a 9 días).']);
+    }
     if(Ls.length>=4){
       const h=Math.floor(Ls.length/2),a1=Ls.slice(0,h).reduce((a,b)=>a+b,0)/h,a2=Ls.slice(h).reduce((a,b)=>a+b,0)/(Ls.length-h);
-      tr=a2-a1>=2?'📈 Tus ciclos recientes son <b>más largos</b> que los anteriores.':a1-a2>=2?'📉 Tus ciclos recientes son <b>más cortos</b> que los anteriores.':'➖ La duración de tus ciclos se ha mantenido <b>estable</b>.';
+      ins.push(a2-a1>=2?['📈','Tus ciclos recientes son más largos que los anteriores.']:a1-a2>=2?['📉','Tus ciclos recientes son más cortos que los anteriores.']:['➖','La duración de tus ciclos se ha mantenido estable.']);
     }
-    let h=tr?'<p class="trend">'+tr+'</p>':'';
-    h+=cyc.slice(-8).reverse().map(c=>{
-      const dv=c.L-ra,odd=c.L<24||c.L>38;
-      const note=odd?(c.L<24?'Más corto':'Más largo')+' de lo habitual (24 a 38 días)':
-        dv===0?'Igual a tu promedio':Math.abs(dv)+(Math.abs(dv)===1?' día ':' días ')+(dv>0?'más':'menos')+' que tu promedio ('+ra+')';
-      return '<div class="vrow"><span class="vm">'+cap(MONTHS[c.start.getMonth()])+' '+c.start.getFullYear()+'</span><span class="vv">'+c.L+' días</span><span class="vn'+(odd?' warn':'')+'">'+note+'</span></div>';
+    const rows=cyc.slice(-8).reverse().map(c=>{
+      const dv=c.L-ra,o2=c.L<24||c.L>38;
+      const note=o2?(c.L<24?'Más corto':'Más largo')+' de lo habitual':dv===0?'Igual a tu promedio':Math.abs(dv)+(Math.abs(dv)===1?' día ':' días ')+(dv>0?'más':'menos')+' que tu promedio';
+      return '<div class="vrow"><span class="vm">'+cap(MONTHS[c.start.getMonth()])+' '+c.start.getFullYear()+'</span><span class="vv">'+c.L+' días</span><span class="vn'+(o2?' warn':'')+'">'+note+'</span></div>';
     }).join('');
-    $('mCycles').innerHTML=h;
+    $('mCycles').innerHTML=statCard({cls:'sc-cyc',label:rangeLabel,title:'Duración de tus ciclos',big:ra,bigCap:'días en promedio',
+      body:bars(rc.map(c=>c.L),rc.map(c=>'<b class="lv">'+c.L+'</b><small>'+cap(MS[c.start.getMonth()])+'</small>'),{min:Math.max(0,Math.min.apply(null,rc.map(c=>c.L))-6),avg:avgL,avgLabel:'Promedio '+r1(avgL)}),
+      ins,foot:'<details class="sc-more"><summary>Ver detalle por mes</summary>'+rows+'</details>'});
   }
-  // Dolor por periodo, como lista
+
+  // 2. Dolor
   const PAIN_FACE={1:'😕',2:'😣',3:'😫',4:'😭'};
   const pp=st.ps.filter(x=>inR(x.start)).map(x=>{
     const v=dayList(x.start,x.end).map(d=>+(state.days[k(d)]||{}).pain||0).filter(Boolean);
     if(!v.length)return null;
-    const avg=v.reduce((a,b)=>a+b,0)/v.length,mx=Math.max.apply(null,v);
-    return {start:x.start,avg,mx,mxN:v.filter(y=>y===mx).length,n:v.length};
+    return {start:x.start,avg:v.reduce((a,b)=>a+b,0)/v.length,mx:Math.max.apply(null,v),n:v.length,vs:v.filter(y=>y===4).length};
   }).filter(Boolean);
   if(!pp.length){
-    $('mPain').innerHTML='<p class="empty">Registra tu nivel de dolor durante tu periodo para ver esto.</p>';
+    $('mPain').innerHTML=statCard({cls:'sc-pain',label:rangeLabel,title:'Dolor en tus periodos',body:'<p class="sc-empty">Registra tu nivel de dolor durante tu periodo para ver esto.</p>'});
   }else{
-    let tr='';
+    const all=pp.reduce((a,x)=>a+x.avg,0)/pp.length,lvl=Math.min(4,Math.max(1,Math.round(all))),rp=pp.slice(-8);
+    const ins=[];
+    ins.push(all<1.5?['✅','Tu dolor suele ser leve. Sentir algo de molestia durante el periodo es común.']
+      :all<2.5?['✅','Tu dolor suele ser moderado, algo frecuente durante el periodo. El calor local y el descanso pueden ayudar.']
+      :['⚠️','Tu dolor suele ser fuerte. Si no mejora con analgésicos o te impide hacer tus actividades, consúltalo con tu ginecóloga.']);
+    const vs=pp.reduce((a,x)=>a+x.vs,0);
+    if(vs)ins.push(['😭','Registraste dolor muy fuerte '+vs+(vs===1?' día':' días')+'. Un dolor así no es algo que debas aguantar; vale la pena consultarlo.']);
+    ins.push(['🗓️','Sueles tener dolor unos '+Math.round(pp.reduce((a,x)=>a+x.n,0)/pp.length)+' días en cada periodo.']);
     if(pp.length>=3){
-      const r=pp.slice(-3),o=pp.slice(0,-3);
-      const ar=r.reduce((a,x)=>a+x.avg,0)/r.length;
-      if(o.length){
-        const ao=o.reduce((a,x)=>a+x.avg,0)/o.length;
-        tr=ar-ao>=0.5?'📈 Tu dolor ha sido <b>más fuerte</b> en tus últimos periodos.':ao-ar>=0.5?'📉 Tu dolor ha sido <b>más leve</b> en tus últimos periodos.':'➖ Tu dolor se ha mantenido <b>parecido</b> entre periodos.';
+      const r=pp.slice(-3),o3=pp.slice(0,-3);
+      if(o3.length){
+        const ar=r.reduce((a,x)=>a+x.avg,0)/r.length,ao=o3.reduce((a,x)=>a+x.avg,0)/o3.length;
+        ins.push(ar-ao>=0.5?['📈','Tu dolor ha sido más fuerte en tus últimos periodos.']:ao-ar>=0.5?['📉','Tu dolor ha sido más leve en tus últimos periodos.']:['➖','Tu dolor se ha mantenido parecido entre periodos.']);
       }
     }
-    let h=tr?'<p class="trend">'+tr+'</p>':'';
-    h+=pp.slice(-8).reverse().map(x=>{
-      const lvl=Math.min(4,Math.max(1,Math.round(x.avg)));
-      const note=x.mx>lvl?'Llegó a '+PAIN_LBL[x.mx].toLowerCase()+(x.mxN>1?' en '+x.mxN+' días':' un día'):x.n+(x.n===1?' día':' días')+' con dolor registrado';
-      return '<div class="vrow"><span class="vm">'+cap(MONTHS[x.start.getMonth()])+' '+x.start.getFullYear()+'</span><span class="vv">'+PAIN_FACE[lvl]+' '+PAIN_LBL[lvl]+'</span><span class="vn'+(x.mx>=4?' warn':'')+'">'+note+'</span></div>';
+    const rows=pp.slice(-8).reverse().map(x=>{
+      const l=Math.min(4,Math.max(1,Math.round(x.avg)));
+      return '<div class="vrow"><span class="vm">'+cap(MONTHS[x.start.getMonth()])+' '+x.start.getFullYear()+'</span><span class="vv">'+PAIN_FACE[l]+' '+PAIN_LBL[l]+'</span><span class="vn'+(x.mx>=4?' warn':'')+'">'+(x.mx>l?'Llegó a '+PAIN_LBL[x.mx].toLowerCase():x.n+(x.n===1?' día':' días')+' con dolor')+'</span></div>';
     }).join('');
-    $('mPain').innerHTML=h;
+    $('mPain').innerHTML=statCard({cls:'sc-pain',label:rangeLabel,title:'Dolor en tus periodos',big:PAIN_FACE[lvl],bigCap:'dolor '+PAIN_LBL[lvl].toLowerCase()+' en promedio',
+      body:bars(rp.map(x=>r1(x.avg)),rp.map(x=>'<b class="em">'+PAIN_FACE[Math.min(4,Math.max(1,Math.round(x.avg)))]+'</b><small>'+cap(MS[x.start.getMonth()])+'</small>'),{avg:all,avgLabel:'Promedio '+painWord(all)}),
+      ins,foot:'<details class="sc-more"><summary>Ver detalle por periodo</summary>'+rows+'</details>'});
   }
-  // Síntomas y ánimo
-  $('mSym').innerHTML=rankList(sym,symPh);
-  $('mMood').innerHTML=rankList(mood,moodPh);
-  // Actividad sexual y deseo
+
+  // 3 y 4. Síntomas y ánimo
+  const tagCard=(id,cls,title,counts,byPh,empty,general)=>{
+    const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    if(!arr.length){$(id).innerHTML=statCard({cls,label:rangeLabel,title,body:'<p class="sc-empty">'+empty+'</p>'});return;}
+    const ins=arr.slice(0,3).map(([l,c])=>{
+      const tp=topPhase(byPh[l]),pct=Math.round(c/Math.max(1,logged)*100);
+      return [ICONS[l]||'•','<b>'+esc(l)+'</b>: '+c+(c===1?' día':' días')+' ('+pct+'% de tus días registrados), '+(tp==='mixed'||!tp?'en distintos momentos del ciclo.':'sobre todo '+PH_TXT[tp]+'.')];
+    });
+    ins.push(['ℹ️',general]);
+    $(id).innerHTML=statCard({cls,label:rangeLabel,title,big:ICONS[arr[0][0]]||'•',bigCap:esc(arr[0][0].toLowerCase())+', lo más frecuente',
+      body:bars(arr.map(x=>x[1]),arr.map(x=>emLabel(x[0])),{hi:0}),ins});
+  };
+  tagCard('mSym','sc-sym','Tus síntomas más comunes',sym,symPh,'Aún no has registrado síntomas en este tiempo.',
+    'Es común que algunos síntomas se repitan en la misma fase de cada ciclo. Si uno es nuevo, muy intenso o afecta tu día a día, coméntalo con tu ginecóloga.');
+  tagCard('mMood','sc-mood','Tu estado de ánimo',mood,moodPh,'Aún no has registrado tu estado de ánimo en este tiempo.',
+    'Los cambios de ánimo durante el ciclo son comunes. Si la tristeza, la ansiedad o la irritabilidad antes de tu periodo son intensas o afectan tu vida, coméntalo: tiene tratamiento.');
+
+  // 5. Actividad sexual y deseo
   const lr=libAverages(fc,inR),phs=Object.keys(lr.avg);
   let libTxt='';
   if(lr.n>=4&&phs.length>=2){
     phs.sort((a,b)=>lr.avg[b]-lr.avg[a]);
-    const hi=phs[0],lo=phs[phs.length-1];
-    libTxt=lr.avg[hi]-lr.avg[lo]>=0.5?'Tu deseo suele ser más alto '+PH_TXT[hi]+' y más bajo '+PH_TXT[lo]+'.':'Tu deseo se mantiene parecido a lo largo del ciclo.';
+    const hi2=phs[0],lo=phs[phs.length-1];
+    libTxt=lr.avg[hi2]-lr.avg[lo]>=0.5?'Tu deseo suele ser más alto '+PH_TXT[hi2]+' y más bajo '+PH_TXT[lo]+'.':'Tu deseo se mantiene parecido a lo largo del ciclo.';
   }else if(lr.n)libTxt='Sigue registrando tu deseo sexual; con algunos días más podré mostrarte cómo cambia durante tu ciclo.';
-  if(!sexDays&&!libTxt){$('mSex').innerHTML=EMPTY;return;}
-  let html='';
-  if(sexDays){
+  if(!sexDays&&!libTxt){
+    $('mSex').innerHTML=statCard({cls:'sc-sex',label:rangeLabel,title:'Actividad sexual y deseo',body:'<p class="sc-empty">Aún no hay registros en este tiempo.</p>'});
+  }else{
     const nM=mRange==='all'?12:+mRange,vals=[],labs=[];
-    for(let i=nM-1;i>=0;i--){const m=new Date(t.getFullYear(),t.getMonth()-i,1);vals.push(sexMonth[m.getFullYear()+'-'+pad(m.getMonth()+1)]||0);labs.push(MS[m.getMonth()]);}
-    html+=barChart(vals,labs,'var(--heart)',{label:'Actividad sexual por mes'});
-    html+='<div class="sub-h">Por tipo</div>'+rankList(sexCat,{});
+    for(let i=nM-1;i>=0;i--){const m=new Date(t.getFullYear(),t.getMonth()-i,1);vals.push(sexMonth[m.getFullYear()+'-'+pad(m.getMonth()+1)]||0);labs.push(cap(MS[m.getMonth()]));}
+    const avgM=vals.reduce((a,b)=>a+b,0)/vals.length,ins=[];
+    const topT=Object.entries(sexCat).sort((a,b)=>b[1]-a[1])[0];
+    if(topT)ins.push(['💗','Lo más frecuente: <b>'+esc(topT[0].toLowerCase())+'</b> ('+topT[1]+(topT[1]===1?' día':' días')+').']);
+    if(libTxt)ins.push(['💭',libTxt]);
+    ins.push(['ℹ️','No existe una frecuencia “normal”: lo importante es que te sientas bien y cómoda.']);
+    $('mSex').innerHTML=statCard({cls:'sc-sex',label:rangeLabel,title:'Actividad sexual y deseo',big:sexDays?r1(avgM):null,bigCap:'días al mes en promedio',
+      body:sexDays?bars(vals,labs.map((l,i)=>'<b class="lv">'+vals[i]+'</b><small>'+l+'</small>'),{avg:avgM,avgLabel:'Promedio '+r1(avgM)}):'',ins});
   }
-  if(libTxt)html+='<div class="sub-h">Tu deseo sexual</div><p style="margin:4px 0 0;color:var(--ink);font-size:.95rem">💗 '+libTxt+'</p>';
-  $('mSex').innerHTML=html;
 }
 
 $('metricRange').addEventListener('click',e=>{
@@ -1425,7 +1557,8 @@ function renderInsights(st,fc){
   });
   const mine=Object.entries(counts).filter(e=>e[1]>=2).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const alerts=computeAlerts(st,fc);
-  let h='<h3><i style="background:'+PHASES[ph][2]+'"></i>Qué esperar en tu '+PHASES[ph][0].toLowerCase()+'</h3>';
+  const warnN=alerts.filter(a=>a[0]==='warn').length;
+  let h='<details class="ifold"'+(state.settings.infoOpen===false?'':' open')+'><summary><h3><i style="background:'+PHASES[ph][2]+'"></i>Qué esperar en tu '+PHASES[ph][0].toLowerCase()+'</h3>'+(warnN?'<span class="ibadge">'+warnN+(warnN===1?' aviso':' avisos')+'</span>':'')+'</summary>';
   h+='<p class="lead">'+info.lead+'</p>';
   if(mine.length){
     h+='<h4>Lo que sueles registrar en esta fase</h4><div class="mine">'+
@@ -1444,7 +1577,7 @@ function renderInsights(st,fc){
     '<li>Tienes fiebre, mareos o te sientes muy débil durante el sangrado.</li>'+
     '</ul></details>';
   h+='<p class="foot">Si tomas pastillas anticonceptivas, tus hormonas son más estables y estos síntomas pueden ser distintos o más leves. Esta información es orientativa y no reemplaza una consulta médica.</p>';
-  card.innerHTML=h;card.hidden=false;
+  card.innerHTML=h+'</details>';card.hidden=false;
 }
 
 // Deseo sexual y salud sexual
@@ -1564,6 +1697,84 @@ $('pPlus').addEventListener('click',()=>stepLen(1));
   if(fs[id]!=null)el.open=!!fs[id];
   el.addEventListener('toggle',()=>{state.settings.fold=Object.assign({},state.settings.fold,{[id]:el.open});save();});
 });
+
+// Personalizar el orden del inicio
+const HOME_DEFAULT=['ring','tiles','quick','info','sex','cal'];
+const HOME_NAMES={ring:'Estado del ciclo',tiles:'Tarjetas del ciclo',quick:'Registro rápido',info:'Qué esperar en tu fase',sex:'Salud sexual',cal:'Calendario'};
+const homeBox=document.createElement('div');homeBox.id='homeBlocks';
+(function(){
+  const sec=$('v-cal');
+  const parts={ring:[$('ring').closest('.card')],tiles:[$('heroTiles')],quick:[$('heroActions').closest('.card')],info:[$('infoCard')],sex:[$('sexCard')],cal:[sec.querySelector('.cal'),sec.querySelector(':scope > p.note-small')]};
+  sec.insertBefore(homeBox,parts.ring[0]);
+  HOME_DEFAULT.forEach(key=>{
+    const w=document.createElement('div');w.className='hblock';w.dataset.block=key;
+    w.innerHTML='<div class="hhandle"><span class="grip" aria-hidden="true">≡</span><span>'+HOME_NAMES[key]+'</span></div>';
+    parts[key].forEach(el=>{if(el)w.appendChild(el);});
+    homeBox.appendChild(w);
+  });
+})();
+function applyHomeOrder(){
+  const ord=(state.settings.homeOrder||[]).filter(x=>HOME_DEFAULT.includes(x));
+  HOME_DEFAULT.forEach(x=>{if(!ord.includes(x))ord.push(x);});
+  ord.forEach(x=>homeBox.appendChild(homeBox.querySelector('[data-block="'+x+'"]')));
+}
+applyHomeOrder();
+function setEditHome(on){
+  if(on)showView('v-cal');
+  document.body.classList.toggle('editing-home',on);
+  homeBox.querySelectorAll('.hblock').forEach(w=>{
+    const vis=[...w.children].some(c=>!c.classList.contains('hhandle')&&!c.hidden&&c.style.display!=='none');
+    w.classList.toggle('empty',!vis);
+  });
+  $('editHome').setAttribute('aria-pressed',on);
+  if(!on)toast('Inicio actualizado');
+  if(on)window.scrollTo(0,0);
+}
+$('editHome').addEventListener('click',()=>setEditHome(!document.body.classList.contains('editing-home')));
+
+let drag=null,dragY=0,dragRaf=0;
+homeBox.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('.hhandle');
+  if(!h||!document.body.classList.contains('editing-home'))return;
+  e.preventDefault();
+  const el=h.parentElement;
+  drag={el,startPage:e.clientY+window.scrollY,origTop:el.offsetTop};
+  dragY=e.clientY;el.classList.add('dragging');
+  try{h.setPointerCapture(e.pointerId);}catch(_){}
+  dragRaf=requestAnimationFrame(dragLoop);
+});
+function moveDrag(){
+  if(!drag)return;
+  const el=drag.el,vis=drag.origTop+(dragY+window.scrollY-drag.startPage);
+  for(let guard=0;guard<10;guard++){
+    const sib=d=>{let x=el[d];while(x&&x.offsetParent===null)x=x[d];return x;};
+    const next=sib('nextElementSibling'),prev=sib('previousElementSibling');
+    if(next&&vis+el.offsetHeight>next.offsetTop+next.offsetHeight/2){homeBox.insertBefore(el,next.nextElementSibling);continue;}
+    if(prev&&vis<prev.offsetTop+prev.offsetHeight/2){homeBox.insertBefore(el,prev);continue;}
+    break;
+  }
+  el.style.transform='translateY('+(vis-el.offsetTop)+'px)';
+}
+function dragLoop(){
+  if(!drag)return;
+  if(dragY>window.innerHeight-150)window.scrollBy(0,6);
+  else if(dragY<80)window.scrollBy(0,-6);
+  moveDrag();
+  dragRaf=requestAnimationFrame(dragLoop);
+}
+document.addEventListener('pointermove',e=>{if(!drag)return;e.preventDefault();dragY=e.clientY;moveDrag();},{passive:false});
+function endDrag(){
+  if(!drag)return;
+  drag.el.style.transform='';drag.el.classList.remove('dragging');
+  cancelAnimationFrame(dragRaf);drag=null;
+  state.settings.homeOrder=[...homeBox.children].map(c=>c.dataset.block);save();
+}
+document.addEventListener('pointerup',endDrag);
+document.addEventListener('pointercancel',endDrag);
+// Recordar si "Qué esperar" está abierto o cerrado
+$('infoCard').addEventListener('toggle',e=>{
+  if(e.target.classList&&e.target.classList.contains('ifold')){state.settings.infoOpen=e.target.open;save();}
+},true);
 
 $('themeChips').addEventListener('click',e=>{
   const b=e.target.closest('[data-theme-val]');if(!b)return;
